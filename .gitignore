@@ -12,4 +12,6 @@ android/app/build/
 android/build/
 android/app/src/main/assets/www/
 *.iml
+*.jks
+*.keystore
 .kotlin/

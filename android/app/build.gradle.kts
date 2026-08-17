@@ -17,6 +17,42 @@ val appVersionName = envOrProp("exerceoVersion", "EXERCEO_VERSION") ?: "0.1.0"
 val appVersionCode =
     envOrProp("exerceoVersionCode", "EXERCEO_VERSION_CODE")?.toInt() ?: 1
 
+fun ensureDebugKeystore(): File {
+    val dir = File(System.getProperty("user.home"), ".android")
+    dir.mkdirs()
+    val store = File(dir, "debug.keystore")
+    if (store.exists()) {
+        return store
+    }
+    val javaHome = File(System.getProperty("java.home"))
+    val keytool =
+        File(javaHome, "bin/keytool.exe").takeIf { it.exists() }
+            ?: File(javaHome, "bin/keytool")
+    exec {
+        commandLine(
+            keytool.absolutePath,
+            "-genkeypair",
+            "-keystore",
+            store.absolutePath,
+            "-storepass",
+            "android",
+            "-alias",
+            "androiddebugkey",
+            "-keypass",
+            "android",
+            "-keyalg",
+            "RSA",
+            "-keysize",
+            "2048",
+            "-validity",
+            "10000",
+            "-dname",
+            "CN=Android Debug,O=Android,C=US",
+        )
+    }
+    return store
+}
+
 android {
     namespace = "com.exerceo.app"
     compileSdk = 36
@@ -39,7 +75,10 @@ android {
                 keyAlias = System.getenv("ANDROID_KEY_ALIAS")
                 keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
             } else {
-                initWith(getByName("debug"))
+                storeFile = ensureDebugKeystore()
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
             }
         }
     }
