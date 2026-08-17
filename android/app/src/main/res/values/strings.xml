@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Exerceo</string>
+    <string name="health_rationale">Exerceo reads exercise sessions, steps, active calories, weight, and body fat from Health Connect so it can show your daily activity and weekly streak. Nothing else is requested.</string>
+</resources>

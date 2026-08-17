@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Cinzel', serif;
+  --font-sans: 'Source Sans 3', system-ui, sans-serif;
+
+  --color-vanilla-50: #f6f6ef;
+  --color-vanilla-100: #ececdf;
+  --color-vanilla-200: #d9d9bf;
+  --color-vanilla-300: #c6c69f;
+  --color-vanilla-400: #b4b47e;
+  --color-vanilla-500: #a1a15e;
+  --color-vanilla-600: #81814b;
+  --color-vanilla-700: #606039;
+  --color-vanilla-800: #404026;
+  --color-vanilla-900: #202013;
+  --color-vanilla-950: #101009;
+
+  --color-ebony-50: #eeeef6;
+  --color-ebony-100: #ddddee;
+  --color-ebony-200: #bcbcdc;
+  --color-ebony-300: #9a9acb;
+  --color-ebony-400: #7878ba;
+  --color-ebony-500: #5757a8;
+  --color-ebony-600: #454587;
+  --color-ebony-700: #343465;
+  --color-ebony-800: #232343;
+  --color-ebony-900: #111122;
+  --color-ebony-950: #090911;
+
+  --color-stone-50: #f4f4f0;
+  --color-stone-100: #e9e9e2;
+  --color-stone-200: #d3d3c5;
+  --color-stone-300: #bdbda8;
+  --color-stone-400: #a7a78b;
+  --color-stone-500: #91916e;
+  --color-stone-600: #747458;
+  --color-stone-700: #575742;
+  --color-stone-800: #3a3a2c;
+  --color-stone-900: #1d1d16;
+  --color-stone-950: #0f0f0b;
+
+  --color-brown-50: #f5f5f0;
+  --color-brown-100: #eaeae1;
+  --color-brown-200: #d6d6c2;
+  --color-brown-300: #c1c1a4;
+  --color-brown-400: #acac86;
+  --color-brown-500: #989867;
+  --color-brown-600: #797953;
+  --color-brown-700: #5b5b3e;
+  --color-brown-800: #3d3d29;
+  --color-brown-900: #1e1e15;
+  --color-brown-950: #0f0f0a;
+
+  --color-gold-50: #f8f8ec;
+  --color-gold-100: #f1f1da;
+  --color-gold-200: #e4e4b4;
+  --color-gold-300: #d6d68f;
+  --color-gold-400: #c9c969;
+  --color-gold-500: #bbbb44;
+  --color-gold-600: #969636;
+  --color-gold-700: #707029;
+  --color-gold-800: #4b4b1b;
+  --color-gold-900: #25250e;
+  --color-gold-950: #131307;
+}
+
+html,
+body,
+#app {
+  min-height: 100dvh;
+}
+
+html {
+  background-color: var(--color-ebony-950);
+}
+
+body {
+  margin: 0;
+  isolation: isolate;
+  background-color: var(--color-ebony-950);
+  color: var(--color-vanilla-50);
+  font-family: var(--font-sans);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -160px;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--color-ebony-950);
+  background-image: url('./assets/spellbook-paper.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(80px);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  background-image: url('./assets/spellbook-grain.svg');
+  background-size: 220px 220px;
+}
+
+* {
+  text-shadow: 1px 1px 1px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+select,
+option {
+  cursor: pointer;
+}
+
+.box-decoration {
+  border-width: 4px;
+  border-style: solid;
+  border-color: var(--box-decoration-color);
+  border-image-source: var(--box-decoration-image);
+  border-image-slice: 4;
+  border-image-repeat: stretch;
+  border-image-outset: 3px;
+}

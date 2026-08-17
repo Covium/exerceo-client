@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.Exerceo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#090911</item>
+        <item name="android:navigationBarColor">#090911</item>
+        <item name="android:windowBackground">#090911</item>
+    </style>
+</resources>
