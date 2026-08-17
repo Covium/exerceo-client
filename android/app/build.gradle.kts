@@ -19,7 +19,7 @@ val appVersionCode =
 
 android {
     namespace = "com.exerceo.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.exerceo.app"
