@@ -94,7 +94,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            buildConfigField("String", "WEB_URL", quoted("file:///android_asset/www/index.html"))
+            buildConfigField(
+                "String",
+                "WEB_URL",
+                quoted("https://exerceo.covium.tech/android/www/index.html"),
+            )
         }
     }
 

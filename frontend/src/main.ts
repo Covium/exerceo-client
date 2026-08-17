@@ -5,10 +5,13 @@ import router from '@/router';
 import { fluent } from '@/i18n/fluent';
 import { useAuthStore } from '@/stores/auth';
 import { useConnectivityStore } from '@/stores/connectivity';
-import { registerSW } from 'virtual:pwa-register';
 import '@/style.css';
 
-registerSW({ immediate: true });
+if (import.meta.env.VITE_ANDROID !== 'true') {
+  void import('virtual:pwa-register').then(({ registerSW }) => {
+    registerSW({ immediate: true });
+  });
+}
 
 const app = createApp(App);
 const pinia = createPinia();

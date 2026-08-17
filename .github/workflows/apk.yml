@@ -54,8 +54,7 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
-          npm run build
-          npm run android:assets
+          npm run android:copy
 
       - uses: actions/setup-java@v4
         with:

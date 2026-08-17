@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "android:assets": "node scripts/copy-android-assets.mjs",
-    "android:copy": "npm run build && npm run android:assets"
+    "android:copy": "vue-tsc -b && vite build --mode android && npm run android:assets"
   },
   "dependencies": {
     "@fluent/bundle": "^0.19.1",

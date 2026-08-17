@@ -1,8 +1,15 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import {
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
+} from 'vue-router';
 import { getToken } from '@/api/client';
 
 const router = createRouter({
-  history: createWebHistory(),
+  history:
+    import.meta.env.VITE_ANDROID === 'true'
+      ? createWebHashHistory()
+      : createWebHistory(),
   routes: [
     {
       path: '/enter',
