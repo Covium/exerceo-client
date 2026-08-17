@@ -9,7 +9,6 @@ interface Window {
   ExerceoNative?: {
     request(id: string, method: string, argsJson: string): void;
   };
-  __EXERCEO_API_URL?: string;
   __exerceoResolve?: (id: string, payloadJson: string) => void;
   __exerceoReject?: (id: string, message: string) => void;
 }

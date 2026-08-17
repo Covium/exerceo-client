@@ -3,6 +3,20 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+fun quoted(value: String): String = "\"${value.replace("\"", "\\\"")}\""
+
+fun envOrProp(prop: String, env: String): String? {
+    val fromProp = (project.findProperty(prop) as String?)?.trim()
+    if (!fromProp.isNullOrEmpty()) {
+        return fromProp
+    }
+    return System.getenv(env)?.trim()?.takeIf { it.isNotEmpty() }
+}
+
+val appVersionName = envOrProp("exerceoVersion", "EXERCEO_VERSION") ?: "0.1.0"
+val appVersionCode =
+    envOrProp("exerceoVersionCode", "EXERCEO_VERSION_CODE")?.toInt() ?: 1
+
 android {
     namespace = "com.exerceo.app"
     compileSdk = 35
@@ -11,10 +25,23 @@ android {
         applicationId = "com.exerceo.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
-        buildConfigField("String", "WEB_URL", "\"http://10.0.2.2:5173\"")
-        buildConfigField("String", "API_URL", "\"http://10.0.2.2:3000\"")
+        versionCode = appVersionCode
+        versionName = appVersionName
+        buildConfigField("String", "WEB_URL", quoted("http://10.0.2.2:5173"))
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("ANDROID_KEYSTORE_FILE")
+            if (keystorePath != null) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            } else {
+                initWith(getByName("debug"))
+            }
+        }
     }
 
     buildTypes {
@@ -23,11 +50,12 @@ android {
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            buildConfigField("String", "WEB_URL", "\"file:///android_asset/www/index.html\"")
+            buildConfigField("String", "WEB_URL", quoted("file:///android_asset/www/index.html"))
         }
     }
 

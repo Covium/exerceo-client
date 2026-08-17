@@ -40,3 +40,5 @@ npm run dev
 ```
 
 The Vite dev server proxies `/api` to `http://localhost:3000` (`exerceo-server`).
+
+CI is `workflow_dispatch` only. Web deploy and APK builds do not run on push. APK `release` bumps git tags `vX.Y.Z` and sets Android `versionName` / `versionCode` from that tag.

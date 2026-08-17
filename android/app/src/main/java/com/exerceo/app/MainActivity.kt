@@ -41,16 +41,7 @@ class MainActivity : ComponentActivity() {
         webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
         webView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
         webView.webChromeClient = WebChromeClient()
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                if (!BuildConfig.DEBUG) {
-                    view?.evaluateJavascript(
-                        "window.__EXERCEO_API_URL = '${BuildConfig.API_URL}';",
-                        null,
-                    )
-                }
-            }
-        }
+        webView.webViewClient = WebViewClient()
         webView.addJavascriptInterface(HealthConnectBridge(this, scope), "ExerceoNative")
         prepareHealthConnect()
         webView.loadUrl(BuildConfig.WEB_URL)

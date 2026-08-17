@@ -12,9 +12,6 @@ const TOKEN_KEY = 'exerceo.token';
 const REQUEST_TIMEOUT_MS = 5000;
 
 function apiBase(): string {
-  if (typeof window !== 'undefined' && window.__EXERCEO_API_URL) {
-    return window.__EXERCEO_API_URL.replace(/\/$/, '');
-  }
   return (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 }
 

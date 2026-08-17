@@ -1,0 +1,98 @@
+name: APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Build an APK, or bump the version and publish a GitHub Release
+        type: choice
+        options:
+          - build
+          - release
+        default: build
+      bump:
+        description: Semver bump when action is release
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+env:
+  VITE_API_URL: https://exerceo.covium.tech/api
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: exerceo-apk-${{ github.event.inputs.action }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Next version
+        id: version
+        env:
+          MODE: ${{ github.event.inputs.action == 'release' && github.event.inputs.bump || 'current' }}
+        run: |
+          chmod +x .github/scripts/next-version.sh
+          .github/scripts/next-version.sh "$MODE" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build web assets
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          npm run android:assets
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Assemble release APK
+        working-directory: android
+        env:
+          EXERCEO_VERSION: ${{ steps.version.outputs.version }}
+          EXERCEO_VERSION_CODE: ${{ steps.version.outputs.code }}
+        run: gradle :app:assembleRelease
+
+      - name: Name APK
+        id: apk
+        run: |
+          src="android/app/build/outputs/apk/release/app-release.apk"
+          dest="android/app/build/outputs/apk/release/exerceo-${{ steps.version.outputs.version }}.apk"
+          mv "$src" "$dest"
+          echo "apk=$dest" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exerceo-apk
+          path: ${{ steps.apk.outputs.apk }}
+
+      - name: GitHub Release
+        if: github.event.inputs.action == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          files: ${{ steps.apk.outputs.apk }}
