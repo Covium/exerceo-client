@@ -11,12 +11,16 @@ import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
-import androidx.webkit.WebViewAssetLoader
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
@@ -37,8 +41,19 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
         setContentView(R.layout.activity_main)
+        WebView.setWebContentsDebuggingEnabled(true)
         webView = findViewById(R.id.webView)
+        ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(bars.left, bars.top, bars.right, bars.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
@@ -78,6 +93,10 @@ class MainActivity : ComponentActivity() {
 
     suspend fun requestHealthPermissions(): String {
         val manager = healthManager
+            ?: run {
+                prepareHealthConnect()
+                healthManager
+            }
             ?: return JSONObject().put("granted", false).toString()
         if (manager.hasPermissions()) {
             return JSONObject().put("granted", true).toString()
@@ -91,7 +110,9 @@ class MainActivity : ComponentActivity() {
 
     suspend fun readHealthRange(startIso: String, endIso: String): String {
         val manager = healthManager ?: throw IllegalStateException("Health Connect unavailable")
-        return manager.readRange(startIso, endIso).toString()
+        return withContext(Dispatchers.IO) {
+            manager.readRange(startIso, endIso).toString()
+        }
     }
 
     fun resolveJs(id: String, payloadJson: String) {

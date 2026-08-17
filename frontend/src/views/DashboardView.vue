@@ -23,6 +23,19 @@
     </header>
 
     <p
+      v-if="dashboard.error"
+      class="border-gold-400 bg-gold-500/10 border px-4 py-3 text-sm"
+    >
+      {{ $t(dashboard.error) }}
+      <span
+        v-if="dashboard.errorDetail"
+        class="text-vanilla-100 mt-2 block font-mono text-xs break-all"
+      >
+        {{ dashboard.errorDetail }}
+      </span>
+    </p>
+
+    <p
       v-if="dashboard.spell"
       class="border-gold-400 bg-gold-500/10 border px-4 py-3"
     >

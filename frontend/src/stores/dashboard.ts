@@ -35,6 +35,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const data = ref<Dashboard | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const errorDetail = ref<string | null>(null);
   const healthStatus = ref<HealthAvailability>('unavailable');
   const syncing = ref(false);
   const spell = ref<string | null>(null);
@@ -54,6 +55,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   async function refresh(): Promise<void> {
     loading.value = true;
     error.value = null;
+    errorDetail.value = null;
     paintFromCache();
     if (isHealthBridgeAvailable()) {
       healthStatus.value = await getHealthAvailability();
@@ -95,7 +97,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
       paintFromCache();
     } catch (cause) {
       if (!isNetworkError(cause)) {
-        error.value = cause instanceof Error ? cause.message : 'error-generic';
+        error.value = 'error-generic';
+        errorDetail.value = cause instanceof Error ? cause.message : null;
       }
     } finally {
       loading.value = false;
@@ -146,8 +149,20 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 
   async function connectHealth(): Promise<void> {
-    await requestHealthPermissions();
-    healthStatus.value = await getHealthAvailability();
+    try {
+      const result = await requestHealthPermissions();
+      if (!result.granted) {
+        error.value = 'health-denied';
+        errorDetail.value = null;
+        return;
+      }
+      error.value = null;
+      errorDetail.value = null;
+      healthStatus.value = await getHealthAvailability();
+    } catch (cause) {
+      error.value = 'health-sync-failed';
+      errorDetail.value = cause instanceof Error ? cause.message : null;
+    }
   }
 
   async function syncHealth(): Promise<void> {
@@ -157,13 +172,24 @@ export const useDashboardStore = defineStore('dashboard', () => {
       return;
     }
     syncing.value = true;
+    error.value = null;
+    errorDetail.value = null;
     try {
+      const permission = await requestHealthPermissions();
+      if (!permission.granted) {
+        error.value = 'health-denied';
+        errorDetail.value = null;
+        return;
+      }
       await mergeHealth(user.id);
       paintFromCache();
       if (isReachable() && !browserOffline()) {
         await flushOutbox(user.id);
         await refresh();
       }
+    } catch (cause) {
+      error.value = 'health-sync-failed';
+      errorDetail.value = cause instanceof Error ? cause.message : null;
     } finally {
       syncing.value = false;
     }
@@ -174,8 +200,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
       return;
     }
     const summaries = await readHealthRange(
-      `${daysAgoIso(21)}T00:00:00`,
-      `${todayIso()}T23:59:59`,
+      new Date(`${daysAgoIso(21)}T00:00:00`).toISOString(),
+      new Date(`${todayIso()}T23:59:59.999`).toISOString(),
     );
     const days: SyncDay[] = summaries.map((day) => ({
       date: day.date,
@@ -213,6 +239,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     data,
     loading,
     error,
+    errorDetail,
     healthStatus,
     syncing,
     spell,

@@ -1,5 +1,6 @@
 package com.exerceo.app
 
+import android.util.Log
 import android.webkit.JavascriptInterface
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -25,8 +26,19 @@ class HealthConnectBridge(
                 }
                 activity.resolveJs(id, payload)
             } catch (error: Exception) {
-                activity.rejectJs(id, error.message ?: "Health Connect error")
+                Log.e("Exerceo", "Health Connect $method failed", error)
+                activity.rejectJs(id, formatError(method, error))
             }
         }
     }
+}
+
+private fun formatError(method: String, error: Throwable): String {
+    val chain = generateSequence(error) { it.cause }
+        .map { type ->
+            val message = type.message?.trim().orEmpty()
+            if (message.isEmpty()) type.javaClass.simpleName else "${type.javaClass.simpleName}: $message"
+        }
+        .joinToString(" ← ")
+    return "$method: $chain"
 }

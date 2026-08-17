@@ -14,7 +14,9 @@ import org.json.JSONObject
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeParseException
 import kotlin.math.roundToInt
 
 class HealthConnectManager(private val client: HealthConnectClient) {
@@ -31,8 +33,8 @@ class HealthConnectManager(private val client: HealthConnectClient) {
     }
 
     suspend fun readRange(startIso: String, endIso: String): JSONArray {
-        val start = Instant.parse(startIso)
-        val end = Instant.parse(endIso)
+        val start = parseInstant(startIso, endOfDay = false)
+        val end = parseInstant(endIso, endOfDay = true)
         val filter = TimeRangeFilter.between(start, end)
         val zone = ZoneId.systemDefault()
         val days = linkedMapOf<LocalDate, DayAccumulator>()
@@ -94,6 +96,20 @@ class HealthConnectManager(private val client: HealthConnectClient) {
             result.put(json)
         }
         return result
+    }
+
+    private fun parseInstant(value: String, endOfDay: Boolean): Instant {
+        try {
+            return Instant.parse(value)
+        } catch (_: DateTimeParseException) {
+            val zone = ZoneId.systemDefault()
+            if (value.length == 10) {
+                val date = LocalDate.parse(value)
+                val local = if (endOfDay) date.plusDays(1).atStartOfDay() else date.atStartOfDay()
+                return local.atZone(zone).toInstant()
+            }
+            return LocalDateTime.parse(value).atZone(zone).toInstant()
+        }
     }
 
     private class DayAccumulator {

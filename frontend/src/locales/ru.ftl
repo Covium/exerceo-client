@@ -74,10 +74,12 @@ card-percent = { $value }%
 card-empty = —
 health-unavailable = Health Connect недоступен в этом браузере.
 health-install = Health Connect не установлен на этом устройстве.
-health-available = Health Connect подключён.
+health-available = Health Connect есть на этом устройстве.
 health-sync = Синхронизация
 health-syncing = Синхронизация…
 health-permission = Разрешить Health Connect
+health-denied = Доступ к Health Connect не выдан.
+health-sync-failed = Не удалось синхронизировать Health Connect.
 
 group-empty = Группы пока нет. Создайте её и пригласите спутника.
 group-create = Создать группу

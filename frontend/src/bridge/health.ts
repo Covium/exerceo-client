@@ -43,11 +43,15 @@ function installCallbacks(): void {
       return;
     }
     pending.delete(id);
+    console.error('[Exerceo native]', message);
     task.reject(new Error(message));
   };
 }
 
-function nativeCall<T>(method: string, args: Record<string, unknown> = {}): Promise<T> {
+function nativeCall<T>(
+  method: string,
+  args: Record<string, unknown> = {},
+): Promise<T> {
   installCallbacks();
   const native = window.ExerceoNative;
   if (!native) {
@@ -72,7 +76,9 @@ export async function getHealthAvailability(): Promise<HealthAvailability> {
     return 'unavailable';
   }
   try {
-    const result = await nativeCall<{ status: HealthAvailability }>('getAvailability');
+    const result = await nativeCall<{ status: HealthAvailability }>(
+      'getAvailability',
+    );
     return result.status;
   } catch {
     return 'unavailable';
@@ -83,6 +89,9 @@ export function requestHealthPermissions(): Promise<{ granted: boolean }> {
   return nativeCall('requestPermissions');
 }
 
-export function readHealthRange(startIso: string, endIso: string): Promise<HealthDaySummary[]> {
+export function readHealthRange(
+  startIso: string,
+  endIso: string,
+): Promise<HealthDaySummary[]> {
   return nativeCall('readRange', { startIso, endIso });
 }
