@@ -44,6 +44,8 @@ latin-mensurae = Mensurae
     .gloss = Measurements
 latin-historia = Historia
     .gloss = History
+latin-configuratio = Configuratio
+    .gloss = Settings
 
 today-complete = Workout complete
 today-incomplete = Time to workout?
@@ -107,7 +109,6 @@ measurement-arm = Arm
 measurement-thigh = Thigh
 measurement-custom = Custom
 
-settings-title = Settings
 settings-goal = Weekly workout goal
 settings-goal-unit = workouts / week
 settings-save = Save

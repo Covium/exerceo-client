@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-xl space-y-6">
     <h1 class="font-display text-gold-400 text-3xl tracking-[0.18em]">
-      {{ $t('settings-title') }}
+      <LatinTerm id="configuratio" />
     </h1>
     <UiPanel as="form" class="space-y-4" @submit.prevent="save">
       <label class="block text-sm">
@@ -49,6 +49,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import LatinTerm from '@/components/LatinTerm.vue';
 import UiButton from '@/components/UiButton.vue';
 import UiInput from '@/components/UiInput.vue';
 import UiPanel from '@/components/UiPanel.vue';

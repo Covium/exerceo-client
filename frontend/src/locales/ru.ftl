@@ -44,6 +44,8 @@ latin-mensurae = Mensurae
     .gloss = Измерения
 latin-historia = Historia
     .gloss = История
+latin-configuratio = Configuratio
+    .gloss = Настройки
 
 today-complete = Тренировка засчитана
 today-incomplete = Время тренироваться?
@@ -109,7 +111,6 @@ measurement-arm = Рука
 measurement-thigh = Бедро
 measurement-custom = Своё
 
-settings-title = Настройки
 settings-goal = Недельная цель
 settings-goal-unit = тренировок / неделю
 settings-save = Сохранить

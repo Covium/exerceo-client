@@ -20,6 +20,7 @@ export const LATIN_TERMS = [
   'cohors',
   'mensurae',
   'historia',
+  'configuratio',
 ] as const;
 
 export type LatinTermId = (typeof LATIN_TERMS)[number];
