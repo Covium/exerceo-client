@@ -7,5 +7,16 @@
       "source.organizeImports": "never"
     }
   },
-  "kotlin.languageServer.enabled": false
+  "kotlin.languageServer.enabled": false,
+  "kotlin.debugAdapter.enabled": false,
+  "files.exclude": {
+    "**/android/.gradle": true,
+    "**/android/app/build": true,
+    "**/android/build": true
+  },
+  "files.watcherExclude": {
+    "**/android/.gradle/**": true,
+    "**/android/app/build/**": true,
+    "**/android/build/**": true
+  }
 }

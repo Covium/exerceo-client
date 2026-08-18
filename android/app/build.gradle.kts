@@ -13,6 +13,11 @@ fun envOrProp(prop: String, env: String): String? {
     return System.getenv(env)?.trim()?.takeIf { it.isNotEmpty() }
 }
 
+val localBuildDir = envOrProp("exerceoAndroidBuildDir", "EXERCEO_ANDROID_BUILD_DIR")
+if (localBuildDir != null) {
+    layout.buildDirectory.set(file(localBuildDir))
+}
+
 val appVersionName = envOrProp("exerceoVersion", "EXERCEO_VERSION") ?: "0.1.0"
 val appVersionCode =
     envOrProp("exerceoVersionCode", "EXERCEO_VERSION_CODE")?.toInt() ?: 1
