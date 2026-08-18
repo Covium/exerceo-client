@@ -77,29 +77,6 @@
       />
     </section>
 
-    <UiPanel>
-      <p class="text-vanilla-100 text-sm">{{ healthLabel }}</p>
-      <div class="mt-3 flex flex-wrap gap-2">
-        <UiButton
-          v-if="dashboard.healthStatus === 'available'"
-          variant="outline"
-          size="sm"
-          :disabled="dashboard.syncing"
-          @click="dashboard.syncHealth()"
-        >
-          {{ dashboard.syncing ? $t('health-syncing') : $t('health-sync') }}
-        </UiButton>
-        <UiButton
-          v-else-if="dashboard.healthStatus !== 'unavailable'"
-          variant="outline"
-          size="sm"
-          @click="dashboard.connectHealth()"
-        >
-          {{ $t('health-permission') }}
-        </UiButton>
-      </div>
-    </UiPanel>
-
     <GroupStatus
       v-for="group in dashboard.data?.groups ?? []"
       :key="group.id"
@@ -126,32 +103,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
-import { useFluent } from 'fluent-vue';
+import { onMounted } from 'vue';
 import ExerceoButton from '@/components/ExerceoButton.vue';
 import GroupStatus from '@/components/GroupStatus.vue';
 import LatinTerm from '@/components/LatinTerm.vue';
 import RomanNumeral from '@/components/RomanNumeral.vue';
 import StatCard from '@/components/StatCard.vue';
-import UiButton from '@/components/UiButton.vue';
 import UiPanel from '@/components/UiPanel.vue';
 import WeekProgress from '@/components/WeekProgress.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useDashboardStore } from '@/stores/dashboard';
 
-const { $t } = useFluent();
 const auth = useAuthStore();
 const dashboard = useDashboardStore();
-
-const healthLabel = computed(() => {
-  if (dashboard.healthStatus === 'available') {
-    return $t('health-available');
-  }
-  if (dashboard.healthStatus === 'install') {
-    return $t('health-install');
-  }
-  return $t('health-unavailable');
-});
 
 function formatNumber(value: number | null | undefined): string | null {
   if (value === null || value === undefined) {

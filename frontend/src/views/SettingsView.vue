@@ -36,6 +36,49 @@
         {{ $t('settings-save') }}
       </UiButton>
     </UiPanel>
+    <UiPanel>
+      <p class="font-display text-gold-400 text-xs tracking-[0.28em]">
+        {{ $t('health-title') }}
+      </p>
+      <p class="text-vanilla-100 mt-3 text-sm">{{ healthLabel }}</p>
+      <p
+        v-if="dashboard.healthStatus !== 'unavailable'"
+        class="text-vanilla-100 mt-2 text-sm"
+      >
+        {{ lastSyncLabel }}
+      </p>
+      <p
+        v-if="dashboard.healthError"
+        class="border-gold-400 bg-gold-500/10 mt-3 border px-4 py-3 text-sm"
+      >
+        {{ $t(dashboard.healthError) }}
+        <span
+          v-if="dashboard.healthErrorDetail"
+          class="text-vanilla-100 mt-2 block font-mono text-xs break-all"
+        >
+          {{ dashboard.healthErrorDetail }}
+        </span>
+      </p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <UiButton
+          v-if="dashboard.healthStatus === 'available'"
+          variant="outline"
+          size="sm"
+          :disabled="dashboard.syncing"
+          @click="dashboard.syncHealth()"
+        >
+          {{ dashboard.syncing ? $t('health-syncing') : $t('health-sync') }}
+        </UiButton>
+        <UiButton
+          v-else-if="dashboard.healthStatus !== 'unavailable'"
+          variant="outline"
+          size="sm"
+          @click="dashboard.connectHealth()"
+        >
+          {{ $t('health-permission') }}
+        </UiButton>
+      </div>
+    </UiPanel>
     <button
       type="button"
       class="text-vanilla-100 hover:text-vanilla-50 text-sm"
@@ -47,8 +90,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useFluent } from 'fluent-vue';
 import LatinTerm from '@/components/LatinTerm.vue';
 import UiButton from '@/components/UiButton.vue';
 import UiInput from '@/components/UiInput.vue';
@@ -57,6 +101,7 @@ import UiSelect from '@/components/UiSelect.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useDashboardStore } from '@/stores/dashboard';
 
+const { $t } = useFluent();
 const auth = useAuthStore();
 const dashboard = useDashboardStore();
 const router = useRouter();
@@ -64,6 +109,29 @@ const displayName = ref(auth.user?.displayName ?? '');
 const language = ref(auth.user?.language === 'ru' ? 'ru' : 'en');
 const goal = ref(auth.user?.weeklyWorkoutGoal ?? 3);
 const saved = ref(false);
+
+const healthLabel = computed(() => {
+  if (dashboard.healthStatus === 'available') {
+    return $t('health-available');
+  }
+  if (dashboard.healthStatus === 'install') {
+    return $t('health-install');
+  }
+  return $t('health-unavailable');
+});
+
+const lastSyncLabel = computed(() => {
+  const at = dashboard.lastHealthSyncAt;
+  if (!at) {
+    return $t('health-never-synced');
+  }
+  const locale = auth.user?.language === 'ru' ? 'ru' : 'en';
+  const when = new Intl.DateTimeFormat(locale, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(at));
+  return $t('health-last-sync', { when });
+});
 
 watch(
   () => auth.user,
@@ -91,4 +159,8 @@ function signOut(): void {
   auth.signOut();
   void router.push({ name: 'enter' });
 }
+
+onMounted(() => {
+  dashboard.paintFromCache();
+});
 </script>

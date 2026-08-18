@@ -10,6 +10,8 @@ import type {
 export const SESSION_KEY = 'exerceo.session';
 const CACHE_PREFIX = 'exerceo.cache.';
 const OUTBOX_PREFIX = 'exerceo.outbox.';
+const HEALTH_ASKED_KEY = 'exerceo.healthAsked';
+const HEALTH_LAST_SYNC_PREFIX = 'exerceo.healthLastSync.';
 
 export type UserCache = {
   activity: Record<string, ActivityDay>;
@@ -80,6 +82,22 @@ export function loadOutbox(userId: string): OutboxOp[] {
 
 export function saveOutbox(userId: string, ops: OutboxOp[]): void {
   localStorage.setItem(OUTBOX_PREFIX + userId, JSON.stringify(ops));
+}
+
+export function loadHealthAsked(): boolean {
+  return localStorage.getItem(HEALTH_ASKED_KEY) === '1';
+}
+
+export function saveHealthAsked(): void {
+  localStorage.setItem(HEALTH_ASKED_KEY, '1');
+}
+
+export function loadHealthLastSync(userId: string): string | null {
+  return localStorage.getItem(HEALTH_LAST_SYNC_PREFIX + userId);
+}
+
+export function saveHealthLastSync(userId: string, iso: string): void {
+  localStorage.setItem(HEALTH_LAST_SYNC_PREFIX + userId, iso);
 }
 
 function readJson<T>(key: string): T | null {

@@ -77,11 +77,14 @@ card-empty = —
 health-unavailable = Health Connect недоступен в этом браузере.
 health-install = Health Connect не установлен на этом устройстве.
 health-available = Health Connect есть на этом устройстве.
+health-title = Health Connect
 health-sync = Синхронизация
 health-syncing = Синхронизация…
 health-permission = Разрешить Health Connect
 health-denied = Доступ к Health Connect не выдан.
 health-sync-failed = Не удалось синхронизировать Health Connect.
+health-last-sync = Последняя синхронизация: { $when }
+health-never-synced = Ещё не синхронизировалось.
 
 group-empty = Группы пока нет. Создайте её и пригласите спутника.
 group-create = Создать группу

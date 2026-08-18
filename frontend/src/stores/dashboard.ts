@@ -23,9 +23,13 @@ import { browserOffline, isNetworkError, isReachable } from '@/offline/network';
 import { enqueue, flushOutbox, newId } from '@/offline/outbox';
 import {
   loadCache,
+  loadHealthAsked,
+  loadHealthLastSync,
   loadOutbox,
   loadSession,
   saveCache,
+  saveHealthAsked,
+  saveHealthLastSync,
   saveSession,
 } from '@/offline/storage';
 import { daysAgoIso, todayIso } from '@/utils/dates';
@@ -37,6 +41,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const error = ref<string | null>(null);
   const errorDetail = ref<string | null>(null);
   const healthStatus = ref<HealthAvailability>('unavailable');
+  const healthError = ref<string | null>(null);
+  const healthErrorDetail = ref<string | null>(null);
+  const lastHealthSyncAt = ref<string | null>(null);
   const syncing = ref(false);
   const spell = ref<string | null>(null);
 
@@ -50,6 +57,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const ops = loadOutbox(user.id);
     applyOutboxToCache(cache, ops);
     data.value = buildDashboard(effectiveUser(user, ops), cache, todayIso());
+    lastHealthSyncAt.value = loadHealthLastSync(user.id);
   }
 
   async function refresh(): Promise<void> {
@@ -148,20 +156,53 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
+  async function promptHealthAccessOnce(): Promise<void> {
+    if (!isHealthBridgeAvailable()) {
+      return;
+    }
+    try {
+      healthStatus.value = await getHealthAvailability();
+    } catch {
+      healthStatus.value = 'unavailable';
+      return;
+    }
+    if (loadHealthAsked() || healthStatus.value !== 'available') {
+      return;
+    }
+    try {
+      const result = await requestHealthPermissions();
+      saveHealthAsked();
+      if (!result.granted) {
+        return;
+      }
+      const auth = useAuthStore();
+      const user = auth.user ?? loadSession();
+      if (!user) {
+        return;
+      }
+      await mergeHealth(user.id);
+      paintFromCache();
+    } catch {
+      saveHealthAsked();
+    }
+  }
+
   async function connectHealth(): Promise<void> {
     try {
       const result = await requestHealthPermissions();
+      saveHealthAsked();
       if (!result.granted) {
-        error.value = 'health-denied';
-        errorDetail.value = null;
+        healthError.value = 'health-denied';
+        healthErrorDetail.value = null;
         return;
       }
-      error.value = null;
-      errorDetail.value = null;
+      healthError.value = null;
+      healthErrorDetail.value = null;
       healthStatus.value = await getHealthAvailability();
     } catch (cause) {
-      error.value = 'health-sync-failed';
-      errorDetail.value = cause instanceof Error ? cause.message : null;
+      saveHealthAsked();
+      healthError.value = 'health-sync-failed';
+      healthErrorDetail.value = cause instanceof Error ? cause.message : null;
     }
   }
 
@@ -172,13 +213,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
       return;
     }
     syncing.value = true;
-    error.value = null;
-    errorDetail.value = null;
+    healthError.value = null;
+    healthErrorDetail.value = null;
     try {
       const permission = await requestHealthPermissions();
+      saveHealthAsked();
       if (!permission.granted) {
-        error.value = 'health-denied';
-        errorDetail.value = null;
+        healthError.value = 'health-denied';
+        healthErrorDetail.value = null;
         return;
       }
       await mergeHealth(user.id);
@@ -188,11 +230,18 @@ export const useDashboardStore = defineStore('dashboard', () => {
         await refresh();
       }
     } catch (cause) {
-      error.value = 'health-sync-failed';
-      errorDetail.value = cause instanceof Error ? cause.message : null;
+      saveHealthAsked();
+      healthError.value = 'health-sync-failed';
+      healthErrorDetail.value = cause instanceof Error ? cause.message : null;
     } finally {
       syncing.value = false;
     }
+  }
+
+  function rememberHealthSync(userId: string): void {
+    const iso = new Date().toISOString();
+    saveHealthLastSync(userId, iso);
+    lastHealthSyncAt.value = iso;
   }
 
   async function mergeHealth(userId: string): Promise<void> {
@@ -216,19 +265,19 @@ export const useDashboardStore = defineStore('dashboard', () => {
         qualifies: true,
       })),
     }));
-    if (days.length === 0) {
-      return;
+    if (days.length > 0) {
+      const cache = loadCache(userId);
+      for (const day of days) {
+        cache.activity[day.date] = mergeSyncDay(cache.activity[day.date], day);
+      }
+      saveCache(userId, cache);
+      enqueue(userId, {
+        id: newId(),
+        type: 'syncActivity',
+        days,
+      });
     }
-    const cache = loadCache(userId);
-    for (const day of days) {
-      cache.activity[day.date] = mergeSyncDay(cache.activity[day.date], day);
-    }
-    saveCache(userId, cache);
-    enqueue(userId, {
-      id: newId(),
-      type: 'syncActivity',
-      days,
-    });
+    rememberHealthSync(userId);
   }
 
   function clearSpell(): void {
@@ -241,11 +290,15 @@ export const useDashboardStore = defineStore('dashboard', () => {
     error,
     errorDetail,
     healthStatus,
+    healthError,
+    healthErrorDetail,
+    lastHealthSyncAt,
     syncing,
     spell,
     paintFromCache,
     refresh,
     markToday,
+    promptHealthAccessOnce,
     connectHealth,
     syncHealth,
     clearSpell,

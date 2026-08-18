@@ -75,11 +75,14 @@ card-empty = —
 health-unavailable = Health Connect is not available in this browser.
 health-install = Health Connect is not installed on this device.
 health-available = Health Connect is on this device.
+health-title = Health Connect
 health-sync = Sync
 health-syncing = Syncing…
 health-permission = Allow Health Connect
 health-denied = Health Connect access was not granted.
 health-sync-failed = Health Connect sync failed.
+health-last-sync = Last synced { $when }
+health-never-synced = Not synced yet.
 
 group-empty = No group yet. Create one and invite a companion.
 group-create = Create group
