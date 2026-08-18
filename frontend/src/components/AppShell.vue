@@ -34,18 +34,38 @@
     </aside>
 
     <main
-      class="flex-1 overflow-auto px-4 py-6 md:px-6 md:py-8"
-      :class="{ 'pb-24': connectivity.unreachable }"
+      ref="mainRef"
+      class="relative min-h-0 flex-1"
+      :class="[
+        isMobile
+          ? 'overflow-hidden'
+          : 'overflow-auto px-4 py-6 md:px-6 md:py-8',
+        { 'pb-24': connectivity.unreachable },
+      ]"
     >
-      <router-view />
+      <router-view v-if="!isMobile" />
+      <template v-else>
+        <section
+          v-for="(item, index) in visualItems"
+          :key="item.to"
+          class="absolute inset-0 touch-pan-y overflow-y-auto overscroll-x-none px-4 py-6"
+          :style="paneStyle(index)"
+          :aria-hidden="index !== displayedIndex"
+          :inert="index !== displayedIndex"
+        >
+          <component :is="item.component" />
+        </section>
+      </template>
     </main>
   </div>
   <OfflineToast />
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import LatinTerm from '@/components/LatinTerm.vue';
 import OfflineToast from '@/components/OfflineToast.vue';
+import { useSwipeNavigation } from '@/composables/useSwipeNavigation';
 import { useConnectivityStore } from '@/stores/connectivity';
 
 const items = [
@@ -57,6 +77,11 @@ const items = [
 ];
 
 const connectivity = useConnectivityStore();
+const mainRef = ref<HTMLElement | null>(null);
+const { isMobile, visualItems, displayedIndex, paneStyle } = useSwipeNavigation(
+  items,
+  mainRef,
+);
 </script>
 
 <style scoped>
