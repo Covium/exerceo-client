@@ -71,9 +71,16 @@ exerceo-done = Accio!
 exerceo-hint = Отметить тренировку за сегодня
 
 card-minutes = { $value } мин
-card-kg = { $value } кг
 card-percent = { $value }%
 card-empty = —
+measurement-amount = { $value } { $unit }
+
+unit-kg = кг
+unit-lb = фунт
+unit-cm = см
+unit-in = дюйм
+unit-percent = %
+
 health-unavailable = Health Connect недоступен в этом браузере.
 health-install = Health Connect не установлен на этом устройстве.
 health-available = Health Connect есть на этом устройстве.

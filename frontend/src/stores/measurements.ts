@@ -17,6 +17,11 @@ import {
 } from '@/offline/storage';
 import { useAuthStore } from '@/stores/auth';
 import { useDashboardStore } from '@/stores/dashboard';
+import {
+  isMeasurementType,
+  isMeasurementUnit,
+  toCanonicalMeasurement,
+} from '@/utils/units';
 
 export const useMeasurementsStore = defineStore('measurements', () => {
   const items = ref<Measurement[]>([]);
@@ -67,13 +72,17 @@ export const useMeasurementsStore = defineStore('measurements', () => {
     if (!userId) {
       return;
     }
+    const stored =
+      isMeasurementType(input.type) && isMeasurementUnit(input.unit)
+        ? toCanonicalMeasurement(input.type, input.value, input.unit)
+        : { value: input.value, unit: input.unit };
     const clientId = newId();
     const externalId = `manual:${clientId}`;
     const local: Measurement = {
       id: clientId,
       type: input.type,
-      value: input.value,
-      unit: input.unit,
+      value: stored.value,
+      unit: stored.unit,
       timestamp: input.timestamp,
       source: 'manual',
       externalId,
@@ -85,8 +94,8 @@ export const useMeasurementsStore = defineStore('measurements', () => {
       const day = cache.activity[date] ?? emptyActivityDay(date);
       cache.activity[date] = {
         ...day,
-        weight: input.type === 'weight' ? input.value : day.weight,
-        bodyFat: input.type === 'body_fat' ? input.value : day.bodyFat,
+        weight: input.type === 'weight' ? stored.value : day.weight,
+        bodyFat: input.type === 'body_fat' ? stored.value : day.bodyFat,
       };
     }
     saveCache(userId, cache);
@@ -95,8 +104,8 @@ export const useMeasurementsStore = defineStore('measurements', () => {
       type: 'createMeasurement',
       payload: {
         type: input.type,
-        value: input.value,
-        unit: input.unit,
+        value: stored.value,
+        unit: stored.unit,
         timestamp: input.timestamp,
         source: 'manual',
         externalId,

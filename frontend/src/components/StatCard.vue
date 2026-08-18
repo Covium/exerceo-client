@@ -17,7 +17,8 @@ import type { LatinTermId } from '@/i18n/terms';
 const props = defineProps<{
   term: LatinTermId;
   value: string | number | null | undefined;
-  format?: 'minutes' | 'kg' | 'percent' | 'plain';
+  format?: 'minutes' | 'amount' | 'percent' | 'plain';
+  unit?: string;
 }>();
 
 const { $t } = useFluent();
@@ -28,8 +29,11 @@ const display = computed(() => {
   if (props.format === 'minutes') {
     return $t('card-minutes', { value: props.value });
   }
-  if (props.format === 'kg') {
-    return $t('card-kg', { value: props.value });
+  if (props.format === 'amount') {
+    return $t('measurement-amount', {
+      value: props.value,
+      unit: props.unit ?? '',
+    });
   }
   if (props.format === 'percent') {
     return $t('card-percent', { value: props.value });

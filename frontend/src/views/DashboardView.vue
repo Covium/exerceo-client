@@ -72,8 +72,9 @@
       />
       <StatCard
         term="pondus"
-        :value="dashboard.data?.today.weight"
-        format="kg"
+        :value="weightValue"
+        format="amount"
+        :unit="weightUnitLabel"
       />
     </section>
 
@@ -94,8 +95,8 @@
           :key="item.id"
           class="text-vanilla-50/90 flex justify-between gap-4"
         >
-          <span>{{ item.type }}</span>
-          <span>{{ item.value }} {{ item.unit }}</span>
+          <span>{{ $t(`measurement-${item.type}`) }}</span>
+          <span>{{ formatMeasurement(item) }}</span>
         </li>
       </ul>
     </UiPanel>
@@ -103,7 +104,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
+import { useFluent } from 'fluent-vue';
 import ExerceoButton from '@/components/ExerceoButton.vue';
 import GroupStatus from '@/components/GroupStatus.vue';
 import LatinTerm from '@/components/LatinTerm.vue';
@@ -113,9 +115,52 @@ import UiPanel from '@/components/UiPanel.vue';
 import WeekProgress from '@/components/WeekProgress.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useDashboardStore } from '@/stores/dashboard';
+import { usePreferencesStore } from '@/stores/preferences';
+import {
+  convertMeasurement,
+  formatMeasurementNumber,
+  isMeasurementType,
+  measurementInUnit,
+  unitFluentId,
+  unitForType,
+} from '@/utils/units';
 
+const { $t } = useFluent();
 const auth = useAuthStore();
 const dashboard = useDashboardStore();
+const preferences = usePreferencesStore();
+
+const weightUnit = computed(() =>
+  unitForType('weight', preferences.unitSystem),
+);
+
+const weightValue = computed(() => {
+  const kg = dashboard.data?.today.weight;
+  if (kg === null || kg === undefined) {
+    return null;
+  }
+  return formatMeasurementNumber(
+    convertMeasurement(kg, 'kg', weightUnit.value),
+  );
+});
+
+const weightUnitLabel = computed(() => $t(unitFluentId(weightUnit.value)));
+
+function formatMeasurement(item: {
+  type: string;
+  value: number;
+  unit: string;
+}): string {
+  const type = isMeasurementType(item.type) ? item.type : null;
+  const target = type
+    ? unitForType(type, preferences.unitSystem)
+    : unitForType('weight', preferences.unitSystem);
+  const converted = measurementInUnit(item.value, item.unit, target);
+  return $t('measurement-amount', {
+    value: formatMeasurementNumber(converted),
+    unit: $t(unitFluentId(target)),
+  });
+}
 
 function formatNumber(value: number | null | undefined): string | null {
   if (value === null || value === undefined) {

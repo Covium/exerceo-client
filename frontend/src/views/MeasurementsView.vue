@@ -19,7 +19,15 @@
       </label>
       <label class="text-sm">
         {{ $t('measurements-unit') }}
-        <UiInput v-model="unit" required />
+        <UiSelect v-model="unit">
+          <option
+            v-for="option in availableUnits"
+            :key="option"
+            :value="option"
+          >
+            {{ $t(unitFluentId(option)) }}
+          </option>
+        </UiSelect>
       </label>
       <UiButton type="submit" class="self-end">
         {{ $t('measurements-add') }}
@@ -38,7 +46,7 @@
           {{ $t(`measurement-${option}`) }}
         </UiButton>
       </div>
-      <MeasurementChart :values="filtered.map((item) => item.value)" />
+      <MeasurementChart :values="chartValues" />
       <ul class="mt-4 space-y-2 text-sm">
         <li
           v-for="item in [...filtered].reverse()"
@@ -46,7 +54,7 @@
           class="flex items-center justify-between gap-3"
         >
           <span>{{ new Date(item.timestamp).toLocaleString() }}</span>
-          <span>{{ item.value }} {{ item.unit }}</span>
+          <span>{{ formatItem(item) }}</span>
           <button
             type="button"
             class="text-vanilla-100 hover:text-gold-300"
@@ -61,7 +69,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useFluent } from 'fluent-vue';
 import MeasurementChart from '@/components/MeasurementChart.vue';
 import LatinTerm from '@/components/LatinTerm.vue';
 import UiButton from '@/components/UiButton.vue';
@@ -69,26 +78,67 @@ import UiInput from '@/components/UiInput.vue';
 import UiPanel from '@/components/UiPanel.vue';
 import UiSelect from '@/components/UiSelect.vue';
 import { useMeasurementsStore } from '@/stores/measurements';
+import { usePreferencesStore } from '@/stores/preferences';
+import {
+  MEASUREMENT_TYPES,
+  convertMeasurement,
+  formatMeasurementNumber,
+  measurementInUnit,
+  systemFromUnit,
+  unitFluentId,
+  unitForType,
+  unitsForType,
+  type MeasurementType,
+  type MeasurementUnit,
+} from '@/utils/units';
 
-const types = ['weight', 'body_fat', 'waist', 'chest', 'arm', 'thigh'] as const;
+const { $t } = useFluent();
+const types = MEASUREMENT_TYPES;
 const measurements = useMeasurementsStore();
-const type = ref<(typeof types)[number]>('weight');
+const preferences = usePreferencesStore();
+const type = ref<MeasurementType>('weight');
 const value = ref<number>(0);
-const unit = ref('kg');
-const filter = ref<(typeof types)[number]>('weight');
+const filter = ref<MeasurementType>('weight');
+
+const availableUnits = computed(() => unitsForType(type.value));
+
+const unit = computed({
+  get(): MeasurementUnit {
+    return unitForType(type.value, preferences.unitSystem);
+  },
+  set(next: MeasurementUnit) {
+    const previous = unitForType(type.value, preferences.unitSystem);
+    if (previous !== next) {
+      value.value = convertMeasurement(value.value, previous, next);
+    }
+    const system = systemFromUnit(next);
+    if (system) {
+      preferences.setUnitSystem(system);
+    }
+  },
+});
 
 const filtered = computed(() =>
   measurements.items.filter((item) => item.type === filter.value),
 );
 
-const units: Record<(typeof types)[number], string> = {
-  weight: 'kg',
-  body_fat: '%',
-  waist: 'cm',
-  chest: 'cm',
-  arm: 'cm',
-  thigh: 'cm',
-};
+const displayUnit = computed(() =>
+  unitForType(filter.value, preferences.unitSystem),
+);
+
+const chartValues = computed(() =>
+  filtered.value.map((item) =>
+    measurementInUnit(item.value, item.unit, displayUnit.value),
+  ),
+);
+
+function formatItem(item: { value: number; unit: string }): string {
+  const converted = measurementInUnit(item.value, item.unit, displayUnit.value);
+  return $t('measurement-amount', {
+    value: formatMeasurementNumber(converted),
+    unit: $t(unitFluentId(displayUnit.value)),
+  });
+}
 
 async function add(): Promise<void> {
   await measurements.add({
@@ -104,12 +154,7 @@ async function remove(id: string): Promise<void> {
   await measurements.remove(id);
 }
 
-watch(type, (next) => {
-  unit.value = units[next];
-});
-
 onMounted(() => {
-  unit.value = units[type.value];
   void measurements.load();
 });
 </script>

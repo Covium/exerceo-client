@@ -69,9 +69,16 @@ exerceo-done = Accio!
 exerceo-hint = Mark a workout for today
 
 card-minutes = { $value } min
-card-kg = { $value } kg
 card-percent = { $value }%
 card-empty = —
+measurement-amount = { $value } { $unit }
+
+unit-kg = kg
+unit-lb = lb
+unit-cm = cm
+unit-in = in
+unit-percent = %
+
 health-unavailable = Health Connect is not available in this browser.
 health-install = Health Connect is not installed on this device.
 health-available = Health Connect is on this device.
