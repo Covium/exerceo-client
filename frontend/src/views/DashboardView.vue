@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 class="font-display text-gold-400 text-3xl tracking-[0.18em]">
+        <h1 class="font-display text-gold-400 tracking-display-wide text-3xl">
           <LatinTerm id="hodie" />
         </h1>
         <p class="text-vanilla-100 mt-1 text-sm">
@@ -86,7 +86,7 @@
     />
 
     <UiPanel v-if="dashboard.data?.recentMeasurements.length">
-      <p class="font-display text-gold-400 text-xs tracking-[0.28em]">
+      <p class="font-display text-gold-400 tracking-display-wide">
         <LatinTerm id="mensurae" />
       </p>
       <ul class="mt-3 space-y-2 text-sm">

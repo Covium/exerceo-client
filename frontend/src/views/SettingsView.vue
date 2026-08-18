@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-xl space-y-6">
-    <h1 class="font-display text-gold-400 text-3xl tracking-[0.18em]">
+    <h1 class="font-display text-gold-400 tracking-display-wide text-3xl">
       <LatinTerm id="configuratio" />
     </h1>
     <UiPanel as="form" class="space-y-4" @submit.prevent="save">
@@ -37,7 +37,7 @@
       </UiButton>
     </UiPanel>
     <UiPanel>
-      <p class="font-display text-gold-400 text-xs tracking-[0.28em]">
+      <p class="font-display text-gold-400 tracking-display-wide">
         {{ $t('health-title') }}
       </p>
       <p class="text-vanilla-100 mt-3 text-sm">{{ healthLabel }}</p>

@@ -6,6 +6,10 @@
   --font-display: 'Cinzel', serif;
   --font-sans: 'Source Sans 3', system-ui, sans-serif;
 
+  --tracking-display-wide: 0.15em;
+  --tracking-display-wider: 0.2em;
+  --tracking-display-widest: 0.25em;
+
   --color-vanilla-50: #f6f6ef;
   --color-vanilla-100: #ececdf;
   --color-vanilla-200: #d9d9bf;

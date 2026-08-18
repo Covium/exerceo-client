@@ -2,7 +2,7 @@
   <HintTooltip
     :text="tooltip"
     :class="[
-      'font-display text-gold-400 text-4xl tracking-[0.2em]',
+      'font-display text-gold-400 tracking-display-wider text-4xl',
       props.class,
     ]"
   >

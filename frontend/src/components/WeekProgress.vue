@@ -2,7 +2,7 @@
   <UiPanel>
     <div class="flex items-end justify-between gap-4">
       <div>
-        <p class="font-display text-gold-400 text-xs tracking-[0.28em]">
+        <p class="font-display text-gold-400 tracking-display-wide">
           <LatinTerm id="haec-hebdomas" />
         </p>
         <p class="mt-1 text-lg">{{ $t('week-progress', { done, target }) }}</p>

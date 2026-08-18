@@ -9,7 +9,7 @@
         class="md:vertical-align-middle flex flex-col gap-1 md:order-2 md:[writing-mode:sideways-lr]"
       >
         <p
-          class="font-display text-gold-400 text-4xl tracking-[0.18em] md:text-6xl"
+          class="font-display text-gold-400 tracking-display-wide text-4xl md:text-6xl"
         >
           <LatinTerm id="app-name" />
         </p>

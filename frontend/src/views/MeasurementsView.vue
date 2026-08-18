@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h1 class="font-display text-gold-400 text-3xl tracking-[0.18em]">
+    <h1 class="font-display text-gold-400 text-3xl tracking-display-wide">
       <LatinTerm id="mensurae" />
     </h1>
 

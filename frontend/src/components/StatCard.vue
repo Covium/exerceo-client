@@ -1,6 +1,6 @@
 <template>
   <UiPanel as="article">
-    <p class="font-display text-gold-400 text-xs tracking-[0.28em]">
+    <p class="font-display text-gold-400 tracking-display-wide">
       <LatinTerm :id="term" />
     </p>
     <p class="font-display text-vanilla-50 mt-3 text-3xl">{{ display }}</p>

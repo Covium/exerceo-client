@@ -1,6 +1,6 @@
 <template>
   <UiPanel>
-    <p class="font-display text-gold-400 text-xs tracking-[0.28em]">
+    <p class="font-display text-gold-400 tracking-display-wide">
       <LatinTerm id="coetus" />
     </p>
     <p v-if="offline" class="text-vanilla-100 mt-3 text-sm">

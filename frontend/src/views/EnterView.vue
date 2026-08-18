@@ -6,9 +6,7 @@
       class="w-full max-w-md"
       @submit.prevent="submit"
     >
-      <p
-        class="font-display text-gold-400 text-center text-4xl tracking-[0.28em]"
-      >
+      <p class="font-display text-gold-400 tracking-display-wide text-center text-4xl">
         {{ $t('app-name') }}
       </p>
       <p class="text-vanilla-100 mt-2 text-center">{{ $t('tagline') }}</p>
@@ -50,7 +48,7 @@
       <UiButton
         type="submit"
         size="lg"
-        class="font-display mt-6 w-full tracking-[0.18em]"
+        class="font-display mt-6 w-full tracking-display-wide"
         :disabled="auth.loading"
       >
         {{ $t('auth-submit') }}
