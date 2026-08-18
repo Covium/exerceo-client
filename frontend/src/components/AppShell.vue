@@ -36,19 +36,22 @@
     <main
       ref="mainRef"
       class="relative min-h-0 flex-1"
-      :class="[
+      :class="
         isMobile
           ? 'overflow-hidden'
-          : 'overflow-auto px-4 py-6 md:px-6 md:py-8',
-        { 'pb-24': connectivity.unreachable },
-      ]"
+          : [
+              'overflow-auto px-4 pt-6 md:px-6 md:pt-8',
+              connectivity.unreachable ? 'pb-34' : 'pb-6 md:pb-8',
+            ]
+      "
     >
       <router-view v-if="!isMobile" />
       <template v-else>
         <section
           v-for="(item, index) in visualItems"
           :key="item.to"
-          class="absolute inset-0 touch-pan-y overflow-y-auto overscroll-x-none px-4 py-6"
+          class="absolute inset-0 touch-pan-y overflow-y-auto overscroll-x-none px-4 pt-6"
+          :class="connectivity.unreachable ? 'pb-34' : 'pb-6'"
           :style="paneStyle(index)"
           :aria-hidden="index !== displayedIndex"
           :inert="index !== displayedIndex"
