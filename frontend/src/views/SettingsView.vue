@@ -4,31 +4,23 @@
       <LatinTerm id="configuratio" />
     </h1>
     <UiPanel as="form" class="space-y-4" @submit.prevent="save">
-      <label class="block text-sm">
-        {{ $t('auth-display-name') }}
-        <UiInput v-model="displayName" />
-      </label>
-      <label class="block text-sm">
-        {{ $t('auth-language') }}
-        <UiSelect v-model="language">
-          <option value="en">{{ $t('language-en') }}</option>
-          <option value="ru">{{ $t('language-ru') }}</option>
-        </UiSelect>
-      </label>
-      <label class="block text-sm">
-        {{ $t('settings-goal') }}
-        <div class="mt-1 flex items-center gap-3">
-          <UiInput
-            v-model.number="goal"
-            type="number"
-            min="1"
-            max="7"
-            :block="false"
-            class="w-24"
-          />
-          <span class="text-vanilla-100">{{ $t('settings-goal-unit') }}</span>
-        </div>
-      </label>
+      <UiInput v-model="displayName" :label="$t('auth-display-name')" />
+      <UiSelect v-model="language" :label="$t('auth-language')">
+        <option value="en">{{ $t('language-en') }}</option>
+        <option value="ru">{{ $t('language-ru') }}</option>
+      </UiSelect>
+      <div class="flex items-end gap-3">
+        <UiInput
+          v-model.number="goal"
+          :label="$t('settings-goal')"
+          type="number"
+          min="1"
+          max="7"
+        />
+        <span class="text-vanilla-100 pb-2">
+          {{ $t('settings-goal-unit') }}
+        </span>
+      </div>
       <p v-if="saved" class="text-gold-400 text-sm">
         {{ $t('settings-saved') }}
       </p>
