@@ -45,6 +45,7 @@
       :key="group.id"
       :group="group"
       :current-user-id="auth.user?.id ?? ''"
+      :show-term="false"
     />
 
     <p v-if="!dashboard.data?.groups.length" class="text-vanilla-100">

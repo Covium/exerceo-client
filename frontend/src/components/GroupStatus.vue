@@ -1,15 +1,23 @@
 <template>
   <UiPanel>
-    <p class="font-display text-gold-400 tracking-display-wide">
+    <p v-if="showTerm" class="font-display text-gold-400 tracking-display-wide">
       <LatinTerm id="coetus" />
     </p>
-    <p v-if="offline" class="text-vanilla-100 mt-3 text-sm">
+    <p
+      v-if="offline"
+      class="text-vanilla-100 text-sm"
+      :class="showTerm ? 'mt-3' : undefined"
+    >
       {{ $t('group-stats-offline') }}
     </p>
     <p v-if="offline" class="text-vanilla-50/90 mt-2 text-sm">
       {{ memberNames }}
     </p>
-    <div v-else class="-mx-2 mt-4 overflow-x-auto">
+    <div
+      v-else
+      class="-mx-2 overflow-x-auto"
+      :class="showTerm ? 'mt-4' : undefined"
+    >
       <table
         class="min-w-full border-separate border-spacing-x-2 text-left text-sm"
       >
@@ -75,10 +83,14 @@ import UiPanel from '@/components/UiPanel.vue';
 import RomanNumeral from '@/components/RomanNumeral.vue';
 import { useConnectivityStore } from '@/stores/connectivity';
 
-const props = defineProps<{
-  group: GroupStatus;
-  currentUserId: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    group: GroupStatus;
+    currentUserId: string;
+    showTerm?: boolean;
+  }>(),
+  { showTerm: true },
+);
 
 const { $t } = useFluent();
 const connectivity = useConnectivityStore();
