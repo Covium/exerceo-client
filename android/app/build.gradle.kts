@@ -16,42 +16,10 @@ fun envOrProp(prop: String, env: String): String? {
 val appVersionName = envOrProp("exerceoVersion", "EXERCEO_VERSION") ?: "0.1.0"
 val appVersionCode =
     envOrProp("exerceoVersionCode", "EXERCEO_VERSION_CODE")?.toInt() ?: 1
-
-fun ensureDebugKeystore(): File {
-    val dir = File(System.getProperty("user.home"), ".android")
-    dir.mkdirs()
-    val store = File(dir, "debug.keystore")
-    if (store.exists()) {
-        return store
-    }
-    val javaHome = File(System.getProperty("java.home"))
-    val keytool =
-        File(javaHome, "bin/keytool.exe").takeIf { it.exists() }
-            ?: File(javaHome, "bin/keytool")
-    exec {
-        commandLine(
-            keytool.absolutePath,
-            "-genkeypair",
-            "-keystore",
-            store.absolutePath,
-            "-storepass",
-            "android",
-            "-alias",
-            "androiddebugkey",
-            "-keypass",
-            "android",
-            "-keyalg",
-            "RSA",
-            "-keysize",
-            "2048",
-            "-validity",
-            "10000",
-            "-dname",
-            "CN=Android Debug,O=Android,C=US",
-        )
-    }
-    return store
-}
+val keystorePath = System.getenv("ANDROID_KEYSTORE_FILE")?.trim()?.takeIf { it.isNotEmpty() }
+val debugWebUrl =
+    envOrProp("exerceoWebUrl", "EXERCEO_WEB_URL") ?: "http://10.0.2.2:5173"
+val bundledWebUrl = "https://exerceo.covium.tech/android/www/index.html"
 
 android {
     namespace = "com.exerceo.app"
@@ -63,22 +31,17 @@ android {
         targetSdk = 35
         versionCode = appVersionCode
         versionName = appVersionName
-        buildConfigField("String", "WEB_URL", quoted("http://10.0.2.2:5173"))
+        buildConfigField("String", "WEB_URL", quoted(debugWebUrl))
     }
 
     signingConfigs {
         create("release") {
-            val keystorePath = System.getenv("ANDROID_KEYSTORE_FILE")
-            if (keystorePath != null) {
-                storeFile = file(keystorePath)
+            val path = keystorePath
+            if (path != null) {
+                storeFile = file(path)
                 storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("ANDROID_KEY_ALIAS")
                 keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
-            } else {
-                storeFile = ensureDebugKeystore()
-                storePassword = "android"
-                keyAlias = "androiddebugkey"
-                keyPassword = "android"
             }
         }
     }
@@ -86,19 +49,20 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
+            if (keystorePath != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+            if (keystorePath != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            buildConfigField(
-                "String",
-                "WEB_URL",
-                quoted("https://exerceo.covium.tech/android/www/index.html"),
-            )
+            buildConfigField("String", "WEB_URL", quoted(bundledWebUrl))
         }
     }
 
