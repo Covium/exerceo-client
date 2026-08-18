@@ -6,36 +6,42 @@
       class="w-full max-w-md"
       @submit.prevent="submit"
     >
-      <p class="font-display text-gold-400 tracking-display-wide text-center text-4xl">
+      <p
+        class="font-display text-gold-400 tracking-display-wide text-center text-4xl"
+      >
         {{ $t('app-name') }}
       </p>
       <p class="text-vanilla-100 mt-2 text-center">{{ $t('tagline') }}</p>
 
-      <label class="text-vanilla-100 mt-8 block text-sm">{{
-        $t('auth-login')
-      }}</label>
-      <UiInput v-model="login" autocomplete="username" required minlength="3" />
-
-      <label class="text-vanilla-100 mt-4 block text-sm">{{
-        $t('auth-password')
-      }}</label>
+      <UiInput
+        v-model="login"
+        class="mt-8"
+        :label="$t('auth-login')"
+        autocomplete="username"
+        required
+        minlength="3"
+      />
       <UiInput
         v-model="password"
+        class="mt-4"
+        :label="$t('auth-password')"
         type="password"
         autocomplete="current-password"
         required
         minlength="8"
       />
-
-      <label class="text-vanilla-100 mt-4 block text-sm">{{
-        $t('auth-display-name')
-      }}</label>
-      <UiInput v-model="displayName" autocomplete="nickname" />
-
-      <label class="text-vanilla-100 mt-4 block text-sm">{{
-        $t('auth-language')
-      }}</label>
-      <UiSelect v-model="language" @change="onLanguage">
+      <UiInput
+        v-model="displayName"
+        class="mt-4"
+        :label="$t('auth-display-name')"
+        autocomplete="nickname"
+      />
+      <UiSelect
+        v-model="language"
+        class="mt-4"
+        :label="$t('auth-language')"
+        @change="onLanguage"
+      >
         <option value="en">{{ $t('language-en') }}</option>
         <option value="ru">{{ $t('language-ru') }}</option>
       </UiSelect>
@@ -48,7 +54,7 @@
       <UiButton
         type="submit"
         size="lg"
-        class="font-display mt-6 w-full tracking-display-wide"
+        class="font-display tracking-display-wide mt-6 w-full"
         :disabled="auth.loading"
       >
         {{ $t('auth-submit') }}

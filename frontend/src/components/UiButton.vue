@@ -28,13 +28,13 @@ const classes = computed(() => {
   const variantClass =
     props.variant === 'outline'
       ? 'border-gold-600 hover:border-gold-500 border'
-      : 'bg-gold-600 hover:bg-gold-500 text-ebony-900';
+      : 'bg-gold-600 border border-gold-600 hover:bg-gold-500 text-ebony-900';
   const sizeClass =
     props.size === 'sm'
       ? 'px-3 py-1 text-sm'
       : props.size === 'lg'
         ? 'px-5 py-3'
-        : 'px-4 py-2';
+        : 'px-4 py-1.5';
   return [
     variantClass,
     sizeClass,

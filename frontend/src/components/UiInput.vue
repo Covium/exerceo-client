@@ -1,23 +1,50 @@
 <template>
+  <label
+    v-if="label"
+    class="text-vanilla-100 flex flex-col gap-1 text-sm"
+    :class="attrs.class"
+  >
+    {{ label }}
+    <input
+      :value="model"
+      :class="inputClass"
+      v-bind="inputAttrs"
+      @input="onInput"
+    />
+  </label>
   <input
+    v-else
     :value="model"
-    :class="[
-      'border-gold-700 ring-gold-400 bg-ebony-950 mt-1 rounded-md border px-3 py-2 outline-none focus:ring-2',
-      block ? 'w-full' : undefined,
-    ]"
+    :class="[inputClass, attrs.class]"
+    v-bind="inputAttrs"
     @input="onInput"
   />
 </template>
 
 <script setup lang="ts" generic="T extends string | number">
-withDefaults(
+import { computed, useAttrs } from 'vue';
+
+defineOptions({ inheritAttrs: false });
+
+const props = withDefaults(
   defineProps<{
     block?: boolean;
+    label?: string;
   }>(),
-  { block: true },
+  { block: true, label: undefined },
 );
 
 const [model, modifiers] = defineModel<T>();
+const attrs = useAttrs();
+
+const inputClass = computed(() => [
+  'border-gold-700 ring-gold-400 bg-ebony-950 rounded-md border px-3 py-2 outline-none focus:ring-2',
+  props.block ? 'w-full' : undefined,
+]);
+
+const inputAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== 'class')),
+);
 
 function onInput(event: Event): void {
   const target = event.target;

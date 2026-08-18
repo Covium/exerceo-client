@@ -1,34 +1,27 @@
 <template>
   <div class="space-y-6">
-    <h1 class="font-display text-gold-400 text-3xl tracking-display-wide">
+    <h1 class="font-display text-gold-400 tracking-display-wide text-3xl">
       <LatinTerm id="mensurae" />
     </h1>
 
     <UiPanel as="form" class="grid gap-3 md:grid-cols-4" @submit.prevent="add">
-      <label class="text-sm">
-        {{ $t('measurements-type') }}
-        <UiSelect v-model="type">
-          <option v-for="option in types" :key="option" :value="option">
-            {{ $t(`measurement-${option}`) }}
-          </option>
-        </UiSelect>
-      </label>
-      <label class="text-sm">
-        {{ $t('measurements-value') }}
-        <UiInput v-model.number="value" type="number" step="0.1" required />
-      </label>
-      <label class="text-sm">
-        {{ $t('measurements-unit') }}
-        <UiSelect v-model="unit">
-          <option
-            v-for="option in availableUnits"
-            :key="option"
-            :value="option"
-          >
-            {{ $t(unitFluentId(option)) }}
-          </option>
-        </UiSelect>
-      </label>
+      <UiSelect v-model="type" :label="$t('measurements-type')">
+        <option v-for="option in types" :key="option" :value="option">
+          {{ $t(`measurement-${option}`) }}
+        </option>
+      </UiSelect>
+      <UiInput
+        v-model.number="value"
+        :label="$t('measurements-value')"
+        type="number"
+        step="0.1"
+        required
+      />
+      <UiSelect v-model="unit" :label="$t('measurements-unit')">
+        <option v-for="option in availableUnits" :key="option" :value="option">
+          {{ $t(unitFluentId(option)) }}
+        </option>
+      </UiSelect>
       <UiButton type="submit" class="self-end">
         {{ $t('measurements-add') }}
       </UiButton>

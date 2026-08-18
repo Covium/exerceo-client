@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h1 class="font-display text-gold-400 text-3xl tracking-display-wide">
+    <h1 class="font-display text-gold-400 tracking-display-wide text-3xl">
       <LatinTerm id="coetus" />
     </h1>
 
@@ -62,11 +62,15 @@
     >
       <UiInput
         v-model="groupName"
-        :placeholder="$t('group-name')"
+        :label="$t('group-name')"
         :disabled="connectivity.unreachable"
         required
       />
-      <UiButton type="submit" :disabled="connectivity.unreachable">
+      <UiButton
+        type="submit"
+        class="self-end"
+        :disabled="connectivity.unreachable"
+      >
         {{ $t('group-create') }}
       </UiButton>
     </UiPanel>
@@ -79,19 +83,21 @@
     >
       <UiInput
         v-model="inviteLogin"
-        :placeholder="$t('group-invite-login')"
+        :label="$t('group-invite-login')"
         :disabled="connectivity.unreachable"
         required
       />
       <UiButton
         type="submit"
         variant="outline"
+        class="self-end"
         :disabled="connectivity.unreachable"
       >
         {{ $t('group-invite') }}
       </UiButton>
       <UiButton
         variant="outline"
+        class="self-end"
         :disabled="connectivity.unreachable"
         @click="leave"
       >
