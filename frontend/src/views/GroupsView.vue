@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <h1 class="font-display text-gold-400 text-3xl tracking-[0.18em]">
-      <LatinTerm id="cohors" />
+      <LatinTerm id="coetus" />
     </h1>
 
     <UiPanel v-if="dashboard.data?.pendingInvitations.length" class="space-y-3">

@@ -17,7 +17,7 @@ export const LATIN_TERMS = [
   'caloriae',
   'pondus',
   'adeps',
-  'cohors',
+  'coetus',
   'mensurae',
   'historia',
   'configuratio',

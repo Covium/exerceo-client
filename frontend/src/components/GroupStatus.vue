@@ -1,7 +1,7 @@
 <template>
   <UiPanel>
     <p class="font-display text-gold-400 text-xs tracking-[0.28em]">
-      <LatinTerm id="cohors" />
+      <LatinTerm id="coetus" />
     </p>
     <p v-if="offline" class="text-vanilla-100 mt-3 text-sm">
       {{ $t('group-stats-offline') }}
