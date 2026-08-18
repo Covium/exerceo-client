@@ -19,6 +19,34 @@ export function formatDateOnly(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+export function formatLocalizedDate(
+  isoDate: string,
+  locale: string,
+  options: Intl.DateTimeFormatOptions = { dateStyle: 'medium' },
+): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (!match) {
+    return isoDate;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return new Intl.DateTimeFormat(locale, options).format(
+    new Date(year, month - 1, day),
+  );
+}
+
+export function formatLocalizedDateTime(
+  value: string,
+  locale: string,
+  options: Intl.DateTimeFormatOptions = {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  },
+): string {
+  return new Intl.DateTimeFormat(locale, options).format(new Date(value));
+}
+
 export function startOfIsoWeek(date: Date): Date {
   const utc = new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),

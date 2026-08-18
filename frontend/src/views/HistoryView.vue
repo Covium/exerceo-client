@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h1 class="font-display text-gold-400 text-3xl tracking-display-wide">
+    <h1 class="font-display text-gold-400 tracking-display-wide text-3xl">
       <LatinTerm id="historia" />
     </h1>
     <WeekProgress
@@ -32,7 +32,7 @@
           :key="day.date"
           class="bg-ebony-950/40 flex items-center justify-between px-3 py-2"
         >
-          <span>{{ day.date }}</span>
+          <span>{{ formatLocalizedDate(day.date, fluentLocale) }}</span>
           <span :class="day.workedOut ? 'text-gold-400' : 'text-vanilla-100'">
             {{ day.workedOut ? '✓' : '·' }}
           </span>
@@ -48,7 +48,9 @@ import LatinTerm from '@/components/LatinTerm.vue';
 import RomanNumeral from '@/components/RomanNumeral.vue';
 import UiPanel from '@/components/UiPanel.vue';
 import WeekProgress from '@/components/WeekProgress.vue';
+import { fluentLocale } from '@/i18n/fluent';
 import { useDashboardStore } from '@/stores/dashboard';
+import { formatLocalizedDate } from '@/utils/dates';
 
 const dashboard = useDashboardStore();
 

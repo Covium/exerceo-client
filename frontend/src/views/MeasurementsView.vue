@@ -46,7 +46,9 @@
           :key="item.id"
           class="flex items-center justify-between gap-3"
         >
-          <span>{{ new Date(item.timestamp).toLocaleString() }}</span>
+          <span>{{
+            formatLocalizedDateTime(item.timestamp, fluentLocale)
+          }}</span>
           <span>{{ formatItem(item) }}</span>
           <button
             type="button"
@@ -70,8 +72,10 @@ import UiButton from '@/components/UiButton.vue';
 import UiInput from '@/components/UiInput.vue';
 import UiPanel from '@/components/UiPanel.vue';
 import UiSelect from '@/components/UiSelect.vue';
+import { fluentLocale } from '@/i18n/fluent';
 import { useMeasurementsStore } from '@/stores/measurements';
 import { usePreferencesStore } from '@/stores/preferences';
+import { formatLocalizedDateTime } from '@/utils/dates';
 import {
   MEASUREMENT_TYPES,
   convertMeasurement,

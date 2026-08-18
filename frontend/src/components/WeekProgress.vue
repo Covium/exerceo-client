@@ -19,7 +19,7 @@
       <HintTooltip
         v-for="day in days"
         :key="day.date"
-        :text="day.date"
+        :text="formatLocalizedDate(day.date, fluentLocale)"
         class="min-w-0 [&_button]:block [&_button]:w-full"
       >
         <div
@@ -40,6 +40,8 @@ import { computed } from 'vue';
 import HintTooltip from '@/components/HintTooltip.vue';
 import LatinTerm from '@/components/LatinTerm.vue';
 import UiPanel from '@/components/UiPanel.vue';
+import { fluentLocale } from '@/i18n/fluent';
+import { formatLocalizedDate } from '@/utils/dates';
 
 const props = defineProps<{
   done: number;

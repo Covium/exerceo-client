@@ -90,8 +90,10 @@ import UiButton from '@/components/UiButton.vue';
 import UiInput from '@/components/UiInput.vue';
 import UiPanel from '@/components/UiPanel.vue';
 import UiSelect from '@/components/UiSelect.vue';
+import { fluentLocale } from '@/i18n/fluent';
 import { useAuthStore } from '@/stores/auth';
 import { useDashboardStore } from '@/stores/dashboard';
+import { formatLocalizedDateTime } from '@/utils/dates';
 
 const { $t } = useFluent();
 const auth = useAuthStore();
@@ -117,11 +119,7 @@ const lastSyncLabel = computed(() => {
   if (!at) {
     return $t('health-never-synced');
   }
-  const locale = auth.user?.language === 'ru' ? 'ru' : 'en';
-  const when = new Intl.DateTimeFormat(locale, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(at));
+  const when = formatLocalizedDateTime(at, fluentLocale.value);
   return $t('health-last-sync', { when });
 });
 
