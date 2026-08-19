@@ -93,14 +93,14 @@ const { isMobile, visualItems, displayedIndex, paneStyle } = useSwipeNavigation(
     background: linear-gradient(
       90deg,
       color-mix(
-          color-mix(in srgb, var(--color-white) 15%, var(--color-ebony-950)) 75%,
+          color-mix(var(--color-white) 20%, var(--color-ebony-950)) 75%,
           transparent
         )
         0%,
       color-mix(var(--color-ebony-950) 75%, transparent) 7.5%,
       color-mix(var(--color-ebony-950) 75%, transparent) 92.5%,
       color-mix(
-        color-mix(in srgb, var(--color-white) 15%, var(--color-ebony-950)) 75%,
+        color-mix(var(--color-white) 20%, var(--color-ebony-950)) 75%,
         transparent
       )
     );
