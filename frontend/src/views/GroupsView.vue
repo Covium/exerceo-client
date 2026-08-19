@@ -41,9 +41,8 @@
     </UiPanel>
 
     <GroupStatus
-      v-for="group in dashboard.data?.groups ?? []"
-      :key="group.id"
-      :group="group"
+      v-if="dashboard.data?.groups.length"
+      :groups="dashboard.data?.groups ?? []"
       :current-user-id="auth.user?.id ?? ''"
       :show-term="false"
     />

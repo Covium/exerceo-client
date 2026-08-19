@@ -52,6 +52,7 @@ export type GroupMemberStatus = {
 export type GroupStatus = {
   id: string;
   name: string;
+  groupStreak: number;
   members: GroupMemberStatus[];
 };
 
