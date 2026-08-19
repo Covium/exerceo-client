@@ -51,7 +51,11 @@
           {{ dashboard.healthErrorDetail }}
         </span>
       </p>
-      <div class="mt-3 flex flex-wrap gap-2">
+
+      <div
+        v-if="dashboard.healthStatus !== 'unavailable'"
+        class="mt-3 flex flex-wrap gap-2"
+      >
         <UiButton
           v-if="dashboard.healthStatus === 'available'"
           variant="outline"
@@ -62,7 +66,7 @@
           {{ dashboard.syncing ? $t('health-syncing') : $t('health-sync') }}
         </UiButton>
         <UiButton
-          v-else-if="dashboard.healthStatus !== 'unavailable'"
+          v-else
           variant="outline"
           size="sm"
           @click="dashboard.connectHealth()"
