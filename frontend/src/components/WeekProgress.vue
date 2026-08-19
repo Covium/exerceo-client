@@ -11,7 +11,8 @@
     </div>
     <div class="bg-ebony-700/50 mt-4 h-3">
       <div
-        class="from-gold-600 to-gold-500 h-full bg-gradient-to-r shadow-[0_0_3px_1px_var(--color-gold-500)] transition-all duration-500"
+        class="from-gold-600 to-gold-500 h-full bg-gradient-to-r transition-all duration-500"
+        :class="{ 'shadow-[0_0_3px_1px_var(--color-gold-500)]': ratio > 0 }"
         :style="{ width: `${Math.min(100, ratio * 100)}%` }"
       />
     </div>
