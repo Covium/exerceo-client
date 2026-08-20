@@ -31,11 +31,13 @@ import { enqueue, flushOutbox, newId } from '@/offline/outbox';
 import {
   loadCache,
   loadHealthAsked,
+  loadHealthBackgroundAsked,
   loadHealthLastSync,
   loadOutbox,
   loadSession,
   saveCache,
   saveHealthAsked,
+  saveHealthBackgroundAsked,
   saveHealthLastSync,
   saveSession,
 } from '@/offline/storage';
@@ -173,12 +175,15 @@ export const useDashboardStore = defineStore('dashboard', () => {
       healthStatus.value = 'unavailable';
       return;
     }
-    if (loadHealthAsked() || healthStatus.value !== 'available') {
+    if (
+      healthStatus.value !== 'available' ||
+      (loadHealthAsked() && loadHealthBackgroundAsked())
+    ) {
       return;
     }
     try {
       const result = await requestHealthPermissions();
-      saveHealthAsked();
+      rememberHealthAsked();
       if (!result.granted) {
         return;
       }
@@ -190,14 +195,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
       await mergeHealth(user.id);
       paintFromCache();
     } catch {
-      saveHealthAsked();
+      rememberHealthAsked();
     }
   }
 
   async function connectHealth(): Promise<void> {
     try {
       const result = await requestHealthPermissions();
-      saveHealthAsked();
+      rememberHealthAsked();
       if (!result.granted) {
         healthError.value = 'health-denied';
         healthErrorDetail.value = null;
@@ -207,7 +212,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       healthErrorDetail.value = null;
       healthStatus.value = await getHealthAvailability();
     } catch (cause) {
-      saveHealthAsked();
+      rememberHealthAsked();
       healthError.value = 'health-sync-failed';
       healthErrorDetail.value = cause instanceof Error ? cause.message : null;
     }
@@ -224,7 +229,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     healthErrorDetail.value = null;
     try {
       const permission = await requestHealthPermissions();
-      saveHealthAsked();
+      rememberHealthAsked();
       if (!permission.granted) {
         healthError.value = 'health-denied';
         healthErrorDetail.value = null;
@@ -237,7 +242,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
         await refresh();
       }
     } catch (cause) {
-      saveHealthAsked();
+      rememberHealthAsked();
       healthError.value = 'health-sync-failed';
       healthErrorDetail.value = cause instanceof Error ? cause.message : null;
     } finally {
@@ -262,6 +267,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     applyOutboxToCache(cache, loadOutbox(user.id));
     saveCache(user.id, cache);
     paintFromCache();
+  }
+
+  function rememberHealthAsked(): void {
+    saveHealthAsked();
+    saveHealthBackgroundAsked();
   }
 
   function rememberHealthSync(userId: string): void {

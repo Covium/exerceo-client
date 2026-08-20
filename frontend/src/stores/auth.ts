@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import { api, ApiError, getToken, setToken } from '@/api/client';
+import {
+  api,
+  ApiError,
+  getToken,
+  setToken,
+  syncNativeSession,
+} from '@/api/client';
 import type { PublicUser } from '@/api/types';
 import { setFluentLocale } from '@/i18n/fluent';
 import { applyProfilePatch } from '@/offline/ledger';
@@ -19,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!getToken()) {
       return;
     }
+    syncNativeSession();
     const cached = loadSession();
     if (cached) {
       user.value = cached;
@@ -99,5 +106,14 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null;
   }
 
-  return { user, loading, error, isAuthenticated, hydrate, enter, updateProfile, signOut };
+  return {
+    user,
+    loading,
+    error,
+    isAuthenticated,
+    hydrate,
+    enter,
+    updateProfile,
+    signOut,
+  };
 });

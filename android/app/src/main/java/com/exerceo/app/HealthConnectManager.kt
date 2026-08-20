@@ -1,6 +1,7 @@
 package com.exerceo.app
 
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.HealthConnectFeatures
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BodyFatRecord
@@ -20,7 +21,7 @@ import java.time.format.DateTimeParseException
 import kotlin.math.roundToInt
 
 class HealthConnectManager(private val client: HealthConnectClient) {
-    val permissions: Set<String> = setOf(
+    val dataPermissions: Set<String> = setOf(
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
@@ -28,8 +29,33 @@ class HealthConnectManager(private val client: HealthConnectClient) {
         HealthPermission.getReadPermission(BodyFatRecord::class),
     )
 
+    val permissions: Set<String>
+        get() = dataPermissions + backgroundReadPermission()
+
     suspend fun hasPermissions(): Boolean {
+        return client.permissionController.getGrantedPermissions().containsAll(dataPermissions)
+    }
+
+    suspend fun hasRequestedPermissions(): Boolean {
         return client.permissionController.getGrantedPermissions().containsAll(permissions)
+    }
+
+    suspend fun canReadInBackground(): Boolean {
+        val extra = backgroundReadPermission()
+        if (extra.isEmpty()) {
+            return true
+        }
+        return client.permissionController.getGrantedPermissions().containsAll(extra)
+    }
+
+    private fun backgroundReadPermission(): Set<String> {
+        val available = client.features.getFeatureStatus(
+            HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_IN_BACKGROUND,
+        ) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
+        if (!available) {
+            return emptySet()
+        }
+        return setOf(HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND)
     }
 
     suspend fun readRange(startIso: String, endIso: String): JSONArray {

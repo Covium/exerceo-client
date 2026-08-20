@@ -11,6 +11,7 @@ export const SESSION_KEY = 'exerceo.session';
 const CACHE_PREFIX = 'exerceo.cache.';
 const OUTBOX_PREFIX = 'exerceo.outbox.';
 const HEALTH_ASKED_KEY = 'exerceo.healthAsked';
+const HEALTH_BACKGROUND_ASKED_KEY = 'exerceo.healthBackgroundAsked';
 const HEALTH_LAST_SYNC_PREFIX = 'exerceo.healthLastSync.';
 
 export type UserCache = {
@@ -90,6 +91,14 @@ export function loadHealthAsked(): boolean {
 
 export function saveHealthAsked(): void {
   localStorage.setItem(HEALTH_ASKED_KEY, '1');
+}
+
+export function loadHealthBackgroundAsked(): boolean {
+  return localStorage.getItem(HEALTH_BACKGROUND_ASKED_KEY) === '1';
+}
+
+export function saveHealthBackgroundAsked(): void {
+  localStorage.setItem(HEALTH_BACKGROUND_ASKED_KEY, '1');
 }
 
 export function loadHealthLastSync(userId: string): string | null {

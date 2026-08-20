@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Exerceo</string>
-    <string name="health_rationale">Exerceo reads exercise sessions, steps, active calories, weight, and body fat from Health Connect so it can show your daily activity and weekly streak. Nothing else is requested.</string>
+    <string name="health_rationale">Exerceo reads exercise sessions, steps, active calories, weight, and body fat from Health Connect so it can show your daily activity and weekly streak. It also reads this data in the background twice a day so your group can see your streak without opening the app.</string>
 </resources>

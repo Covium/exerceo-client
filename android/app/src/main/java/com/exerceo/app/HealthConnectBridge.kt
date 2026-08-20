@@ -22,6 +22,11 @@ class HealthConnectBridge(
                         args.getString("startIso"),
                         args.getString("endIso"),
                     )
+                    "setSession" -> activity.setNativeSession(
+                        args.getString("token"),
+                        args.getString("apiBase"),
+                    )
+                    "clearSession" -> activity.clearNativeSession()
                     else -> throw IllegalArgumentException("Unknown method $method")
                 }
                 activity.resolveJs(id, payload)

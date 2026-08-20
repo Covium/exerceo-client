@@ -95,3 +95,14 @@ export function readHealthRange(
 ): Promise<HealthDaySummary[]> {
   return nativeCall('readRange', { startIso, endIso });
 }
+
+export function setNativeSession(
+  token: string,
+  apiBase: string,
+): Promise<{ ok: boolean }> {
+  return nativeCall('setSession', { token, apiBase });
+}
+
+export function clearNativeSession(): Promise<{ ok: boolean }> {
+  return nativeCall('clearSession');
+}

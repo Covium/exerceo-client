@@ -6,6 +6,11 @@ import type {
   SearchUser,
   SyncDay,
 } from '@/api/types';
+import {
+  clearNativeSession,
+  isHealthBridgeAvailable,
+  setNativeSession,
+} from '@/bridge/health';
 import { NetworkError, setReachable } from '@/offline/network';
 
 const TOKEN_KEY = 'exerceo.token';
@@ -39,6 +44,30 @@ export function setToken(token: string | null): void {
   for (const listener of tokenListeners) {
     listener(token);
   }
+  mirrorNativeSession(token);
+}
+
+export function syncNativeSession(): void {
+  mirrorNativeSession(getToken());
+}
+
+function absoluteApiBase(): string {
+  const base = apiBase();
+  if (/^https?:\/\//i.test(base)) {
+    return base;
+  }
+  const path = base.startsWith('/') ? base : `/${base}`;
+  return `${window.location.origin}${path}`;
+}
+
+function mirrorNativeSession(token: string | null): void {
+  if (!isHealthBridgeAvailable()) {
+    return;
+  }
+  const task = token
+    ? setNativeSession(token, absoluteApiBase())
+    : clearNativeSession();
+  void task.catch(() => undefined);
 }
 
 export class ApiError extends Error {

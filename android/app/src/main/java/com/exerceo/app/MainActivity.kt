@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         PermissionController.createRequestPermissionResultContract(),
     ) { granted ->
         val manager = healthManager
-        permissionWaiter?.complete(manager != null && granted.containsAll(manager.permissions))
+        permissionWaiter?.complete(manager != null && granted.containsAll(manager.dataPermissions))
         permissionWaiter = null
     }
 
@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
         }
         webView.addJavascriptInterface(HealthConnectBridge(this, scope), "ExerceoNative")
         prepareHealthConnect()
+        ActivitySyncScheduler.ensure(applicationContext)
         webView.loadUrl(BuildConfig.WEB_URL)
     }
 
@@ -104,7 +105,7 @@ class MainActivity : ComponentActivity() {
                 healthManager
             }
             ?: return JSONObject().put("granted", false).toString()
-        if (manager.hasPermissions()) {
+        if (manager.hasRequestedPermissions()) {
             return JSONObject().put("granted", true).toString()
         }
         val waiter = CompletableDeferred<Boolean>()
@@ -112,6 +113,18 @@ class MainActivity : ComponentActivity() {
         permissionLauncher.launch(manager.permissions)
         val granted = waiter.await()
         return JSONObject().put("granted", granted).toString()
+    }
+
+    fun setNativeSession(token: String, apiBase: String): String {
+        SessionStore.save(applicationContext, token, apiBase)
+        ActivitySyncScheduler.schedule(applicationContext)
+        return JSONObject().put("ok", true).toString()
+    }
+
+    fun clearNativeSession(): String {
+        SessionStore.clear(applicationContext)
+        ActivitySyncScheduler.cancel(applicationContext)
+        return JSONObject().put("ok", true).toString()
     }
 
     suspend fun readHealthRange(startIso: String, endIso: String): String {
