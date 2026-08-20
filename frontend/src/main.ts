@@ -5,6 +5,7 @@ import router from '@/router';
 import { fluent } from '@/i18n/fluent';
 import { useAuthStore } from '@/stores/auth';
 import { useConnectivityStore } from '@/stores/connectivity';
+import { bindRealtime } from '@/realtime/sync';
 import '@/style.css';
 
 if (import.meta.env.VITE_ANDROID !== 'true') {
@@ -25,5 +26,6 @@ connectivity.bind();
 
 const auth = useAuthStore();
 void auth.hydrate().then(() => {
+  bindRealtime();
   app.mount('#app');
 });

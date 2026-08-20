@@ -16,6 +16,7 @@
     "@fluent/bundle": "^0.19.1",
     "fluent-vue": "^3.7.1",
     "pinia": "^3.0.3",
+    "socket.io-client": "^4.8.3",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
   },

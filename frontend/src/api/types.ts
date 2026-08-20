@@ -104,3 +104,54 @@ export type SyncDay = {
     qualifies?: boolean;
   }[];
 };
+
+export type SelfDaySlice = Pick<Dashboard, 'today' | 'week' | 'streak'>;
+
+export type RealtimeEvent =
+  | {
+      type: 'group.member';
+      asOfDate: string;
+      groupId: string;
+      groupStreak: number;
+      member: GroupMemberStatus;
+    }
+  | {
+      type: 'group.snapshot';
+      asOfDate: string;
+      group: GroupStatus;
+    }
+  | {
+      type: 'group.removed';
+      groupId: string;
+    }
+  | {
+      type: 'member.left';
+      groupId: string;
+      userId: string;
+      asOfDate: string;
+      group: GroupStatus | null;
+    }
+  | {
+      type: 'invitation.created';
+      invitation: PendingInvitation;
+    }
+  | {
+      type: 'invitation.removed';
+      invitationId: string;
+    }
+  | ({
+      type: 'self.day';
+      asOfDate: string;
+    } & SelfDaySlice);
+
+export function realtimeAsOfDate(event: RealtimeEvent): string | undefined {
+  switch (event.type) {
+    case 'group.member':
+    case 'group.snapshot':
+    case 'member.left':
+    case 'self.day':
+      return event.asOfDate;
+    default:
+      return undefined;
+  }
+}

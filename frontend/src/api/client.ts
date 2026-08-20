@@ -15,8 +15,19 @@ function apiBase(): string {
   return (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 }
 
+type TokenListener = (token: string | null) => void;
+
+const tokenListeners = new Set<TokenListener>();
+
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
+}
+
+export function onTokenChange(listener: TokenListener): () => void {
+  tokenListeners.add(listener);
+  return () => {
+    tokenListeners.delete(listener);
+  };
 }
 
 export function setToken(token: string | null): void {
@@ -24,6 +35,9 @@ export function setToken(token: string | null): void {
     localStorage.setItem(TOKEN_KEY, token);
   } else {
     localStorage.removeItem(TOKEN_KEY);
+  }
+  for (const listener of tokenListeners) {
+    listener(token);
   }
 }
 

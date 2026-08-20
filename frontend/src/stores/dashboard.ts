@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { api } from '@/api/client';
-import type { Dashboard, SyncDay } from '@/api/types';
+import {
+  realtimeAsOfDate,
+  type Dashboard,
+  type RealtimeEvent,
+  type SyncDay,
+} from '@/api/types';
 import {
   getHealthAvailability,
   isHealthBridgeAvailable,
@@ -11,6 +16,7 @@ import {
 } from '@/bridge/health';
 import {
   applyOutboxToCache,
+  applyRealtimeEvent,
   buildDashboard,
   cloneCache,
   effectiveUser,
@@ -238,6 +244,25 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
+  function applySyncEvent(event: RealtimeEvent): void {
+    const auth = useAuthStore();
+    const user = auth.user ?? loadSession();
+    if (!user) {
+      return;
+    }
+    const today = todayIso();
+    const asOf = realtimeAsOfDate(event);
+    if (asOf !== undefined && asOf !== today) {
+      void refresh();
+      return;
+    }
+    const cache = cloneCache(loadCache(user.id));
+    applyRealtimeEvent(cache, event);
+    applyOutboxToCache(cache, loadOutbox(user.id));
+    saveCache(user.id, cache);
+    paintFromCache();
+  }
+
   function rememberHealthSync(userId: string): void {
     const iso = new Date().toISOString();
     saveHealthLastSync(userId, iso);
@@ -296,6 +321,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     syncing,
     spell,
     paintFromCache,
+    applySyncEvent,
     refresh,
     markToday,
     promptHealthAccessOnce,

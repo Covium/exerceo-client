@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
         includeAssets: ['favicon.svg'],
         workbox: {
           navigateFallback: 'index.html',
-          navigateFallbackDenylist: [/^\/api/],
+          navigateFallbackDenylist: [/^\/api/, /^\/socket.io/],
         },
         manifest: {
           name: 'Exerceo',
@@ -49,6 +49,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: 'http://localhost:3000',
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
           configure(proxy) {
             proxy.on('error', (_error, _request, response) => {

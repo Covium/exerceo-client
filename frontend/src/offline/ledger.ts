@@ -1,8 +1,10 @@
 import type {
   ActivityDay,
   Dashboard,
+  GroupStatus,
   Measurement,
   PublicUser,
+  RealtimeEvent,
   SyncDay,
 } from '@/api/types';
 import {
@@ -34,9 +36,22 @@ export function cloneCache(cache: UserCache): UserCache {
   return {
     activity: { ...cache.activity },
     measurements: cache.measurements.map((item) => ({ ...item })),
-    groups: cache.groups,
-    pendingInvitations: cache.pendingInvitations,
+    groups: cache.groups.map((group) => ({
+      ...group,
+      members: group.members.map((member) => ({ ...member })),
+    })),
+    pendingInvitations: cache.pendingInvitations.map((item) => ({ ...item })),
   };
+}
+
+function replaceGroup(groups: GroupStatus[], next: GroupStatus): GroupStatus[] {
+  const index = groups.findIndex((group) => group.id === next.id);
+  if (index < 0) {
+    return [...groups, next];
+  }
+  return groups.map((group, groupIndex) =>
+    groupIndex === index ? next : group,
+  );
 }
 
 export function activityFromDashboard(
@@ -82,7 +97,10 @@ export function ingestMeasurements(
   cache.measurements = measurements.map((item) => ({ ...item }));
 }
 
-export function mergeSyncDay(existing: ActivityDay | undefined, day: SyncDay): ActivityDay {
+export function mergeSyncDay(
+  existing: ActivityDay | undefined,
+  day: SyncDay,
+): ActivityDay {
   const base = existing ?? emptyActivityDay(day.date);
   const qualifies = (day.sessions ?? []).some(
     (session) => session.qualifies !== false,
@@ -168,6 +186,92 @@ export function applyProfilePatch(
     language: payload.language ?? user.language,
     weeklyWorkoutGoal: payload.weeklyWorkoutGoal ?? user.weeklyWorkoutGoal,
   };
+}
+
+export function applyRealtimeEvent(
+  cache: UserCache,
+  event: RealtimeEvent,
+): void {
+  switch (event.type) {
+    case 'group.member': {
+      cache.groups = cache.groups.map((group) => {
+        if (group.id !== event.groupId) {
+          return group;
+        }
+        const members = group.members.some(
+          (member) => member.userId === event.member.userId,
+        )
+          ? group.members.map((member) =>
+              member.userId === event.member.userId ? event.member : member,
+            )
+          : [...group.members, event.member];
+        return {
+          ...group,
+          groupStreak: event.groupStreak,
+          members,
+        };
+      });
+      return;
+    }
+    case 'group.snapshot':
+      cache.groups = replaceGroup(cache.groups, event.group);
+      return;
+    case 'group.removed':
+      cache.groups = cache.groups.filter((group) => group.id !== event.groupId);
+      cache.pendingInvitations = cache.pendingInvitations.filter(
+        (invitation) => invitation.group.id !== event.groupId,
+      );
+      return;
+    case 'member.left':
+      if (event.group === null) {
+        cache.groups = cache.groups.filter(
+          (group) => group.id !== event.groupId,
+        );
+        return;
+      }
+      cache.groups = replaceGroup(cache.groups, event.group);
+      return;
+    case 'invitation.created':
+      if (
+        cache.pendingInvitations.some(
+          (invitation) => invitation.id === event.invitation.id,
+        )
+      ) {
+        cache.pendingInvitations = cache.pendingInvitations.map((invitation) =>
+          invitation.id === event.invitation.id ? event.invitation : invitation,
+        );
+        return;
+      }
+      cache.pendingInvitations = [
+        event.invitation,
+        ...cache.pendingInvitations,
+      ];
+      return;
+    case 'invitation.removed':
+      cache.pendingInvitations = cache.pendingInvitations.filter(
+        (invitation) => invitation.id !== event.invitationId,
+      );
+      return;
+    case 'self.day': {
+      const current =
+        cache.activity[event.today.date] ?? emptyActivityDay(event.today.date);
+      cache.activity[event.today.date] = {
+        ...current,
+        date: event.today.date,
+        workedOut: event.today.workedOut,
+        workoutMinutes: event.today.workoutMinutes,
+        steps: event.today.steps,
+        activeCalories: event.today.activeCalories,
+        weight: event.today.weight,
+        bodyFat: event.today.bodyFat,
+      };
+      for (const day of event.week.days) {
+        const row = cache.activity[day.date] ?? emptyActivityDay(day.date);
+        cache.activity[day.date] = { ...row, workedOut: day.workedOut };
+      }
+      return;
+    }
+  }
 }
 
 export function effectiveUser(user: PublicUser, ops: OutboxOp[]): PublicUser {
