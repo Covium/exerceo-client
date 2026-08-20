@@ -75,6 +75,29 @@ function coalesce(ops: OutboxOp[], incoming: OutboxOp): OutboxOp[] {
       incoming,
     ];
   }
+  if (incoming.type === 'createMeasurement') {
+    const index = ops.findIndex(
+      (op) =>
+        op.type === 'createMeasurement' &&
+        op.payload.externalId === incoming.payload.externalId,
+    );
+    if (index < 0) {
+      return [...ops, incoming];
+    }
+    const existing = ops[index];
+    if (!existing || existing.type !== 'createMeasurement') {
+      return [...ops, incoming];
+    }
+    const next = [...ops];
+    next[index] = {
+      ...incoming,
+      payload: {
+        ...incoming.payload,
+        clientId: existing.payload.clientId,
+      },
+    };
+    return next;
+  }
   if (incoming.type === 'deleteMeasurement') {
     const createIndex = ops.findIndex(
       (op) =>
@@ -110,7 +133,9 @@ function mergeDays(base: SyncDay[], extra: SyncDay[]): SyncDay[] {
       sessions: [...sessions.values()],
     });
   }
-  return [...map.values()].sort((left, right) => left.date.localeCompare(right.date));
+  return [...map.values()].sort((left, right) =>
+    left.date.localeCompare(right.date),
+  );
 }
 
 async function execute(userId: string, op: OutboxOp): Promise<void> {
@@ -156,5 +181,10 @@ function shouldKeep(cause: unknown): boolean {
   if (!(cause instanceof ApiError)) {
     return true;
   }
-  return cause.status === 401 || cause.status === 408 || cause.status === 429 || cause.status >= 500;
+  return (
+    cause.status === 401 ||
+    cause.status === 408 ||
+    cause.status === 429 ||
+    cause.status >= 500
+  );
 }

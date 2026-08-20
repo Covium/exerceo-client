@@ -104,6 +104,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useFluent } from 'fluent-vue';
 import ExerceoButton from '@/components/ExerceoButton.vue';
 import GroupStatus from '@/components/GroupStatus.vue';
@@ -112,11 +113,11 @@ import RomanNumeral from '@/components/RomanNumeral.vue';
 import StatCard from '@/components/StatCard.vue';
 import UiPanel from '@/components/UiPanel.vue';
 import WeekProgress from '@/components/WeekProgress.vue';
+import type { Dashboard } from '@/api/types';
 import { useAuthStore } from '@/stores/auth';
 import { useDashboardStore } from '@/stores/dashboard';
 import { usePreferencesStore } from '@/stores/preferences';
 import {
-  convertMeasurement,
   formatMeasurementNumber,
   isMeasurementType,
   measurementInUnit,
@@ -128,18 +129,17 @@ const { $t } = useFluent();
 const auth = useAuthStore();
 const dashboard = useDashboardStore();
 const preferences = usePreferencesStore();
+const { unitSystem } = storeToRefs(preferences);
 
-const weightUnit = computed(() =>
-  unitForType('weight', preferences.unitSystem),
-);
+const weightUnit = computed(() => unitForType('weight', unitSystem.value));
 
 const weightValue = computed(() => {
-  const kg = dashboard.data?.today.weight;
-  if (kg === null || kg === undefined) {
+  const sample = latestWeightSample(dashboard.data);
+  if (!sample) {
     return null;
   }
   return formatMeasurementNumber(
-    convertMeasurement(kg, 'kg', weightUnit.value),
+    measurementInUnit(sample.value, sample.unit, weightUnit.value),
   );
 });
 
@@ -152,13 +152,44 @@ function formatMeasurement(item: {
 }): string {
   const type = isMeasurementType(item.type) ? item.type : null;
   const target = type
-    ? unitForType(type, preferences.unitSystem)
-    : unitForType('weight', preferences.unitSystem);
+    ? unitForType(type, unitSystem.value)
+    : unitForType('weight', unitSystem.value);
   const converted = measurementInUnit(item.value, item.unit, target);
   return $t('measurement-amount', {
     value: formatMeasurementNumber(converted),
     unit: $t(unitFluentId(target)),
   });
+}
+
+function latestWeightSample(
+  data: Dashboard | null,
+): { value: number; unit: string } | null {
+  if (!data) {
+    return null;
+  }
+  const measured = [...data.recentMeasurements]
+    .filter((item) => item.type === 'weight')
+    .sort((left, right) => right.timestamp.localeCompare(left.timestamp))[0];
+  const activity = [...(data.activityDays ?? [])]
+    .filter((day) => day.weight !== null && day.weight !== undefined)
+    .sort((left, right) => right.date.localeCompare(left.date))[0];
+  if (measured && activity?.weight !== undefined && activity.weight !== null) {
+    const measuredDate = measured.timestamp.slice(0, 10);
+    if (measuredDate >= activity.date) {
+      return { value: measured.value, unit: measured.unit };
+    }
+    return { value: activity.weight, unit: 'kg' };
+  }
+  if (measured) {
+    return { value: measured.value, unit: measured.unit };
+  }
+  if (data.today.weight !== null && data.today.weight !== undefined) {
+    return { value: data.today.weight, unit: 'kg' };
+  }
+  if (activity?.weight !== undefined && activity.weight !== null) {
+    return { value: activity.weight, unit: 'kg' };
+  }
+  return null;
 }
 
 function formatNumber(value: number | null | undefined): string | null {

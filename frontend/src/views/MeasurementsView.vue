@@ -40,15 +40,15 @@
         </UiButton>
       </div>
       <MeasurementChart :values="chartValues" />
-      <ul class="mt-4 space-y-2 text-sm">
+      <ul v-if="filtered.length" class="mt-4 space-y-2 text-sm">
         <li
           v-for="item in [...filtered].reverse()"
           :key="item.id"
           class="flex items-center justify-between gap-3"
         >
-          <span>{{
-            formatLocalizedDateTime(item.timestamp, fluentLocale)
-          }}</span>
+          <span>
+            {{ formatLocalizedDateTime(item.timestamp, fluentLocale) }}
+          </span>
           <span>{{ formatItem(item) }}</span>
           <button
             type="button"

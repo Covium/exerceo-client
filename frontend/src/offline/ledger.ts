@@ -145,6 +145,47 @@ export function upsertMeasurement(
   measurements.push({ ...item });
 }
 
+export function healthConnectWeightExternalId(date: string): string {
+  return `health_connect:weight:${date}`;
+}
+
+export function ingestHealthConnectWeights(
+  cache: UserCache,
+  days: SyncDay[],
+): Measurement[] {
+  const changed: Measurement[] = [];
+  for (const day of days) {
+    if (day.weight === undefined || !Number.isFinite(day.weight)) {
+      continue;
+    }
+    const value = Math.round(day.weight * 100) / 100;
+    const externalId = healthConnectWeightExternalId(day.date);
+    const existing = cache.measurements.find(
+      (item) => item.externalId === externalId,
+    );
+    if (
+      existing &&
+      existing.type === 'weight' &&
+      existing.unit === 'kg' &&
+      existing.value === value
+    ) {
+      continue;
+    }
+    const measurement: Measurement = {
+      id: existing?.id ?? externalId,
+      type: 'weight',
+      value,
+      unit: 'kg',
+      timestamp: `${day.date}T00:00:00.000Z`,
+      source: 'health_connect',
+      externalId,
+    };
+    upsertMeasurement(cache.measurements, measurement);
+    changed.push(measurement);
+  }
+  return changed;
+}
+
 export function applyOutboxToCache(cache: UserCache, ops: OutboxOp[]): void {
   for (const op of ops) {
     if (op.type === 'syncActivity') {
@@ -163,6 +204,16 @@ export function applyOutboxToCache(cache: UserCache, ops: OutboxOp[]): void {
         source: op.payload.source,
         externalId: op.payload.externalId,
       });
+      if (op.payload.type === 'weight' || op.payload.type === 'body_fat') {
+        const date = op.payload.timestamp.slice(0, 10);
+        const day = cache.activity[date] ?? emptyActivityDay(date);
+        cache.activity[date] = {
+          ...day,
+          weight: op.payload.type === 'weight' ? op.payload.value : day.weight,
+          bodyFat:
+            op.payload.type === 'body_fat' ? op.payload.value : day.bodyFat,
+        };
+      }
     } else if (op.type === 'deleteMeasurement') {
       cache.measurements = cache.measurements.filter(
         (item) =>

@@ -21,6 +21,7 @@ import {
   cloneCache,
   effectiveUser,
   ingestDashboard,
+  ingestHealthConnectWeights,
   ingestMeasurements,
   markActivityDay,
   mergeSyncDay,
@@ -295,7 +296,23 @@ export const useDashboardStore = defineStore('dashboard', () => {
       for (const day of days) {
         cache.activity[day.date] = mergeSyncDay(cache.activity[day.date], day);
       }
+      const weights = ingestHealthConnectWeights(cache, days);
       saveCache(userId, cache);
+      for (const measurement of weights) {
+        enqueue(userId, {
+          id: newId(),
+          type: 'createMeasurement',
+          payload: {
+            type: measurement.type,
+            value: measurement.value,
+            unit: measurement.unit,
+            timestamp: measurement.timestamp,
+            source: measurement.source,
+            externalId: measurement.externalId ?? '',
+            clientId: measurement.id,
+          },
+        });
+      }
       enqueue(userId, {
         id: newId(),
         type: 'syncActivity',
